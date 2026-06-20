@@ -7,44 +7,67 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
-export class AuthAccessTokenSchema extends BaseModel {
-  static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
-  $columns = AuthAccessTokenSchema.$columns
-  @column()
-  declare abilities: string
+export class CompanySchema extends BaseModel {
+  static $columns = ['createdAt', 'deletedAt', 'id', 'isActive', 'name', 'slug', 'updatedAt'] as const
+  $columns = CompanySchema.$columns
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime | null
+  declare createdAt: DateTime
   @column.dateTime()
-  declare expiresAt: DateTime | null
-  @column()
-  declare hash: string
+  declare deletedAt: DateTime | null
   @column({ isPrimary: true })
-  declare id: number
-  @column.dateTime()
-  declare lastUsedAt: DateTime | null
+  declare id: bigint | number
   @column()
-  declare name: string | null
+  declare isActive: boolean
   @column()
-  declare tokenableId: number
+  declare name: string
   @column()
-  declare type: string
+  declare slug: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
+}
+
+export class RefreshTokenSchema extends BaseModel {
+  static $columns = ['createdAt', 'expiresAt', 'id', 'isRevoked', 'token', 'updatedAt', 'userId'] as const
+  $columns = RefreshTokenSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare expiresAt: DateTime
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare isRevoked: boolean
+  @column()
+  declare token: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare userId: bigint | number
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
+  static $columns = ['companyId', 'createdAt', 'deletedAt', 'email', 'id', 'isActive', 'lastLoginAt', 'name', 'password', 'role', 'updatedAt'] as const
   $columns = UserSchema.$columns
+  @column()
+  declare companyId: bigint | number
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column.dateTime()
+  declare deletedAt: DateTime | null
   @column()
   declare email: string
-  @column()
-  declare fullName: string | null
   @column({ isPrimary: true })
-  declare id: number
+  declare id: bigint | number
+  @column()
+  declare isActive: boolean
+  @column.dateTime()
+  declare lastLoginAt: DateTime | null
+  @column()
+  declare name: string
   @column({ serializeAs: null })
   declare password: string
+  @column()
+  declare role: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 }

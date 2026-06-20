@@ -30,8 +30,8 @@ if [ ! -f "package.json" ]; then
   echo "=========================================="
 fi
 
-# Caso o node_modules não esteja presente (por causa de mapeamento de volume, por exemplo)
-if [ ! -d "node_modules" ]; then
+# Caso o node_modules esteja vazio (por causa de mapeamento de volume anônimo)
+if [ ! -d "node_modules/typescript" ]; then
   echo "Instalando dependências via npm install..."
   npm install --legacy-peer-deps
 fi

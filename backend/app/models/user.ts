@@ -1,18 +1,50 @@
-import { UserSchema } from '#database/schema'
+import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
-import { compose } from '@adonisjs/core/helpers'
-import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
-import { type AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
+import { BaseModel, column, belongsTo, beforeSave } from '@adonisjs/lucid/orm'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import Company from './company.js'
 
-export default class User extends compose(UserSchema, withAuthFinder(hash)) {
-  static accessTokens = DbAccessTokensProvider.forModel(User)
-  declare currentAccessToken?: AccessToken
+export default class User extends BaseModel {
+  @column({ isPrimary: true })
+  declare id: string
 
-  get initials() {
-    const [first, last] = this.fullName ? this.fullName.split(' ') : this.email.split('@')
-    if (first && last) {
-      return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
+  @column()
+  declare companyId: string
+
+  @column()
+  declare name: string
+
+  @column()
+  declare email: string
+
+  @column({ serializeAs: null })
+  declare password: string
+
+  @column()
+  declare role: string
+
+  @column()
+  declare isActive: boolean
+
+  @column.dateTime()
+  declare lastLoginAt: DateTime | null
+
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+
+  @belongsTo(() => Company)
+  declare company: BelongsTo<typeof Company>
+
+  @beforeSave()
+  static async hashPassword(user: User) {
+    if (user.$dirty.password) {
+      user.password = await hash.make(user.password)
     }
-    return `${first.slice(0, 2)}`.toUpperCase()
   }
 }

@@ -50,7 +50,7 @@ const goToEdit = () => {
 
 const confirmDelete = async () => {
   if (selectedUsers.value.length === 0) return
-  
+
   const confirm = await swal.confirm('Excluir Usuário', `Tem certeza que deseja excluir ${selectedUsers.value.length} usuário(s)?`)
   if (confirm) {
     const ids = selectedUsers.value.map(u => u.id)
@@ -69,7 +69,8 @@ const confirmDelete = async () => {
         <p class="mt-1 text-sm text-gray-500">Gerencie os usuários do escritório e suas permissões.</p>
       </div>
       <div class="mt-4 sm:mt-0 flex gap-2">
-        <Button v-if="selectedUsers.length > 0" variant="ghost" class="text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200" @click="confirmDelete">
+        <Button v-if="selectedUsers.length > 0" variant="ghost"
+          class="text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200" @click="confirmDelete">
           <i class="fa-solid fa-trash mr-2"></i>
           Excluir Selecionados
         </Button>
@@ -84,15 +85,9 @@ const confirmDelete = async () => {
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-      <Grid 
-        :rowData="users" 
-        :columnDefs="columnDefs"
-        :totalRows="users.length"
-        :currentPage="1"
-        :pageSize="50"
-        @update:selection="handleSelection"
-      />
+    <div class="bg-white w-full rounded-xl shadow-sm border-gray-200 p-4">
+      <Grid :rowData="users" :columnDefs="columnDefs" :totalRows="users.length" :currentPage="1" :pageSize="50"
+        @update:selection="handleSelection" />
     </div>
   </div>
 </template>

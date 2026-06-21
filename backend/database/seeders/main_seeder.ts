@@ -18,7 +18,8 @@ export default class extends BaseSeeder {
       email: 'admin@pillararq.com',
       password: 'admin123',
       role: 'ADMIN',
-      isActive: true
+      isActive: true,
+      isMaster: true
     })
   }
 }

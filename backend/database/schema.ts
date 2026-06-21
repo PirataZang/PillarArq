@@ -46,12 +46,14 @@ export class RefreshTokenSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['companyId', 'createdAt', 'deletedAt', 'email', 'id', 'isActive', 'lastLoginAt', 'name', 'password', 'role', 'updatedAt'] as const
+  static $columns = ['companyId', 'createdAt', 'createdBy', 'deletedAt', 'email', 'id', 'isActive', 'isMaster', 'lastLoginAt', 'name', 'password', 'role', 'token', 'updatedAt', 'updatedBy'] as const
   $columns = UserSchema.$columns
   @column()
   declare companyId: bigint | number
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column()
+  declare createdBy: bigint | number | null
   @column.dateTime()
   declare deletedAt: DateTime | null
   @column()
@@ -60,6 +62,8 @@ export class UserSchema extends BaseModel {
   declare id: bigint | number
   @column()
   declare isActive: boolean
+  @column()
+  declare isMaster: boolean
   @column.dateTime()
   declare lastLoginAt: DateTime | null
   @column()
@@ -68,6 +72,10 @@ export class UserSchema extends BaseModel {
   declare password: string
   @column()
   declare role: string
+  @column()
+  declare token: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+  @column()
+  declare updatedBy: bigint | number | null
 }

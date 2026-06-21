@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
+import User from '#models/user'
 
 export default class TenantMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
-    const user = ctx.auth?.user
+    const user = ctx.auth?.user as User
     
     if (!user || !user.companyId) {
       return ctx.response.status(401).send({

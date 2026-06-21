@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#services/auth_service'
 import { loginValidator, refreshTokenValidator } from '#validators/auth_validator'
+import User from '#models/user'
 
 export default class AuthController {
   private authService = new AuthService()
@@ -46,7 +47,7 @@ export default class AuthController {
   }
 
   async logout({ auth, response }: HttpContext) {
-    const user = auth.user!
+    const user = auth.user as User
     await this.authService.logout(user.id)
 
     return response.ok({
@@ -57,7 +58,7 @@ export default class AuthController {
   }
 
   async me({ auth, response }: HttpContext) {
-    const user = auth.user!
+    const user = auth.user as User
 
     return response.ok({
       success: true,
@@ -67,6 +68,7 @@ export default class AuthController {
         name: user.name,
         email: user.email,
         role: user.role,
+        is_master: user.isMaster,
         company_id: user.companyId
       }
     })

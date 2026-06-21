@@ -16,7 +16,7 @@ const emit = defineEmits(['toggleSidebar'])
     <!-- Left side -->
     <div class="flex items-center flex-1">
       <button @click="emit('toggleSidebar')"
-        class="lg:hidden text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md mr-4">
+        class="lg:hidden text-gray-500 hover:text-gray-900 focus:outline-none rounded-md mr-4">
         <i class="fa-solid fa-bars text-xl"></i>
       </button>
       <div class="hidden sm:block">

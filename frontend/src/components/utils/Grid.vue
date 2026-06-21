@@ -1,77 +1,55 @@
 <template>
-  <div class="w-full h-[80vh] flex flex-col ag-theme-quartz">
-    <AgGridVue 
-      class="w-full flex-1 min-h-0" 
-      theme="legacy" 
-      :rowData="rowData" 
-      :columnDefs="columnDefs" 
-      :columnTypes="columnTypes"
-      :defaultColDef="defaultColDef" 
-      :localeText="localeText" 
-      :rowSelection="rowSelection" 
-      @grid-ready="onGridReady"
-      @selection-changed="onSelectionChanged" 
-    />
-
-    <!-- Painel de Paginação Premium Customizado -->
-    <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left p-3 px-5 bg-white border-t border-gray-100 rounded-b-2xl text-sm text-gray-600 flex-wrap gap-4 md:gap-3">
-      
-      <div class="font-medium order-1 md:order-1">
-        Exibindo <span class="text-blue-600 font-semibold">{{ fromRecord }}</span> a <span class="text-blue-600 font-semibold">{{ toRecord }}</span> de
-        <span class="text-blue-600 font-semibold">{{ totalRows }}</span> registros
-      </div>
-
-      <div class="flex items-center gap-1.5 order-2 md:order-2 w-full md:w-auto justify-center">
-        <button 
-          class="inline-flex items-center justify-center w-[34px] h-[34px] rounded-lg border border-gray-200 bg-white text-gray-700 font-medium cursor-pointer transition-all outline-none hover:bg-gray-100 hover:border-gray-300 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed" 
-          :disabled="currentPage === 1" @click="changePage(1)" title="Primeira Página">
-          <i class="fa-solid fa-angles-left"></i>
-        </button>
-        <button 
-          class="inline-flex items-center justify-center w-[34px] h-[34px] rounded-lg border border-gray-200 bg-white text-gray-700 font-medium cursor-pointer transition-all outline-none hover:bg-gray-100 hover:border-gray-300 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed" 
-          :disabled="currentPage === 1" @click="changePage(currentPage - 1)"
-          title="Página Anterior">
-          <i class="fa-solid fa-angle-left"></i>
-        </button>
-
-        <button v-for="page in visiblePages" :key="page" 
-          class="inline-flex items-center justify-center w-[34px] h-[34px] rounded-lg border text-sm cursor-pointer transition-all outline-none"
-          :class="page === currentPage ? 'bg-blue-600 border-blue-600 text-white font-semibold' : 'border-gray-200 bg-white text-gray-700 font-medium hover:bg-gray-100 hover:border-gray-300 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed'" 
-          @click="changePage(page)">
-          {{ page }}
-        </button>
-
-        <button 
-          class="inline-flex items-center justify-center w-[34px] h-[34px] rounded-lg border border-gray-200 bg-white text-gray-700 font-medium cursor-pointer transition-all outline-none hover:bg-gray-100 hover:border-gray-300 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed" 
-          :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)"
-          title="Próxima Página">
-          <i class="fa-solid fa-angle-right"></i>
-        </button>
-        <button 
-          class="inline-flex items-center justify-center w-[34px] h-[34px] rounded-lg border border-gray-200 bg-white text-gray-700 font-medium cursor-pointer transition-all outline-none hover:bg-gray-100 hover:border-gray-300 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed" 
-          :disabled="currentPage === totalPages" @click="changePage(totalPages)"
-          title="Última Página">
-          <i class="fa-solid fa-angles-right"></i>
-        </button>
-      </div>
-
-      <div class="flex items-center gap-2 font-medium order-3 md:order-3">
-        <span>Registros por página:</span>
-        <select :value="pageSize" @change="changePageSize($event)" class="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium cursor-pointer outline-none transition-colors focus:border-blue-600">
-          <option :value="10">10</option>
-          <option :value="25">25</option>
-          <option :value="50">50</option>
-          <option :value="100">100</option>
-        </select>
-      </div>
+    <div class="grid-wrapper ag-theme-quartz">
+        <AgGridVue class="grid" theme="legacy" :rowData="rowData" :columnDefs="columnDefs" :columnTypes="columnTypes" :defaultColDef="defaultColDef" :localeText="localeText" :rowSelection="rowSelection" @grid-ready="onGridReady" @selection-changed="onSelectionChanged" />
+        
+        <!-- Painel de Paginação Premium Customizado -->
+        <div class="custom-pagination">
+            <div class="pagination-info">
+                Exibindo <span class="highlight">{{ fromRecord }}</span> a <span class="highlight">{{ toRecord }}</span> de <span class="highlight">{{ totalRows }}</span> registros
+            </div>
+            
+            <div class="pagination-controls">
+                <button class="pag-btn" :disabled="currentPage === 1" @click="changePage(1)" title="Primeira Página">
+                    <i class="fa-solid fa-angles-left"></i>
+                </button>
+                <button class="pag-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)" title="Página Anterior">
+                    <i class="fa-solid fa-angle-left"></i>
+                </button>
+                
+                <button 
+                    v-for="page in visiblePages" 
+                    :key="page" 
+                    class="pag-btn page-num" 
+                    :class="{ active: page === currentPage }"
+                    @click="changePage(page)"
+                >
+                    {{ page }}
+                </button>
+                
+                <button class="pag-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)" title="Próxima Página">
+                    <i class="fa-solid fa-angle-right"></i>
+                </button>
+                <button class="pag-btn" :disabled="currentPage === totalPages" @click="changePage(totalPages)" title="Última Página">
+                    <i class="fa-solid fa-angles-right"></i>
+                </button>
+            </div>
+            
+            <div class="pagination-size">
+                <span>Registros por página:</span>
+                <select :value="pageSize" @change="changePageSize($event)" class="size-select">
+                    <option :value="10">10</option>
+                    <option :value="25">25</option>
+                    <option :value="50">50</option>
+                    <option :value="100">100</option>
+                </select>
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue'
 import { AgGridVue } from 'ag-grid-vue3'
-import type { ColDef, ColGroupDef, GridApi, LocaleText } from 'ag-grid-community'
 import { ModuleRegistry, ClientSideRowModelModule, CellStyleModule, RowSelectionModule, TextFilterModule, NumberFilterModule, DateFilterModule, LocaleModule, ValidationModule } from 'ag-grid-community'
 
 /* ===============================
@@ -82,114 +60,102 @@ ModuleRegistry.registerModules([ClientSideRowModelModule, CellStyleModule, RowSe
 /* ===============================
    PROPS
 ================================ */
-const props = withDefaults(defineProps<{
-  rowData: any[]
-  columnDefs: (ColDef | ColGroupDef)[]
-  defaultColDef?: ColDef
-  currentPage?: number
-  pageSize?: number
-  totalRows?: number
-}>(), {
-  currentPage: 1,
-  pageSize: 50,
-  totalRows: 0
+const props = defineProps({
+    rowData: { type: Array, required: true },
+    columnDefs: { type: Array, required: true },
+    defaultColDef: { type: Object, default: () => ({ sortable: true, filter: true, floatingFilter: false, resizable: true }) },
+    currentPage: { type: Number, default: 1 },
+    pageSize: { type: Number, default: 50 },
+    totalRows: { type: Number, default: 0 }
 })
 
 /* ===============================
    EMITS
 ================================ */
-const emit = defineEmits<{
-  (e: 'update:selection', value: any[]): void
-  (e: 'update:page', value: number): void
-  (e: 'update:pageSize', value: number): void
-}>()
+const emit = defineEmits(['update:selection', 'update:page', 'update:pageSize'])
 
 /* ===============================
    GRID API
 ================================ */
-const gridApi = ref<GridApi | null>(null)
+const gridApi = ref(null)
 
-const onGridReady = (params: { api: GridApi }) => {
-  gridApi.value = params.api
+const onGridReady = (params) => {
+    gridApi.value = params.api
 }
 
 const onSelectionChanged = () => {
-  if (!gridApi.value) return
-  const selectedData = gridApi.value.getSelectedNodes().map((node) => node.data)
-  emit('update:selection', selectedData)
+    if (!gridApi.value) return
+    const selectedData = gridApi.value.getSelectedNodes().map((node) => node.data)
+    emit('update:selection', selectedData)
 }
 
 /* ===============================
    CONFIGS
 ================================ */
-const rowSelection: any = {
-  mode: 'multiRow',
-  checkboxes: true,
-  headerCheckbox: true,
+const rowSelection = {
+    mode: 'multiRow',
+    checkboxes: true,
+    headerCheckbox: true,
 }
 
-const defaultColDef: ColDef = {
-  sortable: true,
-  filter: true,
-  floatingFilter: false,
-  resizable: true,
-}
+const localeText = {
+    page: 'Página',
+    more: 'Mais',
+    to: 'até',
+    of: 'de',
+    next: 'Próxima',
+    last: 'Última',
+    first: 'Primeira',
+    previous: 'Anterior',
+    loadingOoo: 'Carregando...',
+    selectAll: 'Selecionar tudo',
+    searchOoo: 'Pesquisar...',
+    blanks: 'Em branco',
 
-const localeText: LocaleText = {
-  page: 'Página',
-  more: 'Mais',
-  to: 'até',
-  of: 'de',
-  next: 'Próxima',
-  last: 'Última',
-  first: 'Primeira',
-  previous: 'Anterior',
-  loadingOoo: 'Carregando...',
-  selectAll: 'Selecionar tudo',
-  searchOoo: 'Pesquisar...',
-  blanks: 'Em branco',
-  filterOoo: 'Filtrar...',
-  equals: 'Igual',
-  notEqual: 'Diferente',
-  lessThan: 'Menor que',
-  greaterThan: 'Maior que',
-  contains: 'Contém',
-  notContains: 'Não contém',
-  startsWith: 'Começa com',
-  endsWith: 'Termina com',
-  blank: 'Vazio',
-  notBlank: 'Não Vazio',
-  after: 'Depois',
-  before: 'Antes',
-  true: 'Verdadeiro',
-  between: 'Entre',
-  false: 'Falso',
-  applyFilter: 'Aplicar filtro',
-  clearFilter: 'Limpar filtro',
+    filterOoo: 'Filtrar...',
+    equals: 'Igual',
+    notEqual: 'Diferente',
+    lessThan: 'Menor que',
+    greaterThan: 'Maior que',
+    contains: 'Contém',
+    notContains: 'Não contém',
+    startsWith: 'Começa com',
+    endsWith: 'Termina com',
+    blank: 'Vazio',
+    notBlank: 'Não Vazio',
+    after: 'Depois',
+    before: 'Antes',
+    true: 'Verdadeiro',
+    between: 'Entre',
+    false: 'Falso',
+    applyFilter: 'Aplicar filtro',
+    clearFilter: 'Limpar filtro',
 }
 
 const columnTypes = {
-  date: {
-    filter: 'agDateColumnFilter',
-    valueFormatter: (params: any) => {
-      if (!params.value) return ''
-      return new Date(params.value).toLocaleDateString('pt-BR')
+    date: {
+        filter: 'agDateColumnFilter',
+        valueFormatter: (params) => {
+            if (!params.value) return ''
+            return new Date(params.value).toLocaleDateString('pt-BR')
+        },
     },
-  },
-  datetime: {
-    filter: 'agDateColumnFilter',
-    valueFormatter: (params: any) => {
-      if (!params.value) return ''
-      return new Date(params.value).toLocaleString('pt-BR')
+
+    datetime: {
+        filter: 'agDateColumnFilter',
+        valueFormatter: (params) => {
+            if (!params.value) return ''
+            return new Date(params.value).toLocaleString('pt-BR')
+        },
     },
-  },
-  money: {
-    filter: 'agNumberColumnFilter',
-    valueFormatter: (params: any) => {
-      if (!params.value) return ''
-      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(params.value)
+
+    money: {
+        filter: 'agNumberColumnFilter',
+        valueFormatter: (params) => {
+            if (!params.value) return ''
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(params.value)
+        },
     },
-  },
 }
 
 /* ===============================
@@ -200,56 +166,175 @@ const fromRecord = computed(() => props.totalRows === 0 ? 0 : (props.currentPage
 const toRecord = computed(() => Math.min(props.currentPage * props.pageSize, props.totalRows))
 
 const visiblePages = computed(() => {
-  const pages = []
-  const range = 2
-  const start = Math.max(1, props.currentPage - range)
-  const end = Math.min(totalPages.value, props.currentPage + range)
+    const pages = []
+    const range = 2
+    const start = Math.max(1, props.currentPage - range)
+    const end = Math.min(totalPages.value, props.currentPage + range)
 
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  return pages
+    for (let i = start; i <= end; i++) {
+        pages.push(i)
+    }
+    return pages
 })
 
-const changePage = (page: number) => {
-  if (page >= 1 && page <= totalPages.value && page !== props.currentPage) {
-    emit('update:page', page)
-  }
+const changePage = (page) => {
+    if (page >= 1 && page <= totalPages.value && page !== props.currentPage) {
+        emit('update:page', page)
+    }
 }
 
-const changePageSize = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const size = parseInt(target.value, 10)
-  emit('update:pageSize', size)
-  emit('update:page', 1)
+const changePageSize = (event) => {
+    const size = parseInt(event.target.value, 10)
+    emit('update:pageSize', size)
+    emit('update:page', 1)
 }
 </script>
 
-<style>
-/* 
-  AgGrid native cell alignment classes.
-  We leave these since they are directly attached to grid configuration classes,
-  but moved from SCSS to normal CSS for native use in colDefs.
-*/
-.grid .cell-center {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+<style scoped>
+.grid-wrapper {
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
 }
 
-.grid .cell-right {
-  display: flex;
-  justify-content: end;
-  align-items: end;
-  text-align: right;
+.grid-wrapper .grid {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
 }
 
-.grid .cell-left {
-  display: flex;
-  justify-content: start;
-  align-items: start;
-  text-align: left;
+.grid-wrapper .grid :deep(.cell-center) {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.grid-wrapper .grid :deep(.cell-right) {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.grid-wrapper .grid :deep(.cell-left) {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.custom-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-top: 1px solid #f3f4f6;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    font-size: 0.875rem;
+    color: #4b5563;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.custom-pagination .pagination-info {
+    font-weight: 500;
+}
+
+.custom-pagination .pagination-info .highlight {
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+.custom-pagination .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.custom-pagination .pagination-controls .pag-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.custom-pagination .pagination-controls .pag-btn:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #111827;
+}
+
+.custom-pagination .pagination-controls .pag-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.custom-pagination .pagination-controls .pag-btn.page-num {
+    font-size: 0.875rem;
+}
+
+.custom-pagination .pagination-controls .pag-btn.page-num.active {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.custom-pagination .pagination-size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.custom-pagination .pagination-size .size-select {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.custom-pagination .pagination-size .size-select:focus {
+    border-color: #4f46e5;
+}
+
+@media (max-width: 768px) {
+    .custom-pagination {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+    }
+    .custom-pagination .pagination-info {
+        order: 1;
+    }
+    .custom-pagination .pagination-controls {
+        order: 2;
+        width: 100%;
+        justify-content: center;
+    }
+    .custom-pagination .pagination-size {
+        order: 3;
+    }
 }
 </style>

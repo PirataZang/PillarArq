@@ -45,11 +45,11 @@ const hasError = computed(() => !!props.error)
         @blur="$emit('blur', $event)"
         @focus="$emit('focus', $event)"
         @change="$emit('change', $event)"
-        class="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 transition-all duration-200 bg-white placeholder:text-gray-400"
+        class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset sm:text-sm sm:leading-6 transition-all duration-200 bg-white placeholder:text-gray-400 focus:outline-none"
         :class="[
           hasError 
-            ? 'ring-red-300 focus:ring-red-500 text-red-900 placeholder:text-red-300' 
-            : 'ring-gray-300 focus:ring-blue-600',
+            ? 'ring-red-300 text-red-900 placeholder:text-red-300' 
+            : 'ring-gray-300',
           disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : '',
           readonly && !disabled ? 'bg-gray-50 focus:ring-gray-300 cursor-default' : ''
         ]"

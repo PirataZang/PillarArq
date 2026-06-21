@@ -34,7 +34,7 @@ const props = defineProps({
   }
 })
 
-const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed'
+const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-all duration-200 focus:outline-none active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100'
 
 const sizeClasses = computed(() => {
   if (props.icon) {
@@ -55,12 +55,12 @@ const sizeClasses = computed(() => {
 
 const variantClasses = computed(() => {
   return {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-600 border border-transparent shadow-sm',
-    secondary: 'bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-600 border border-gray-300 shadow-sm',
-    success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-600 border border-transparent shadow-sm',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-600 border border-transparent shadow-sm',
-    warning: 'bg-yellow-500 text-white hover:bg-yellow-600 focus:ring-yellow-500 border border-transparent shadow-sm',
-    ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500 border border-transparent'
+    primary: 'bg-blue-600 text-white hover:bg-blue-700 border border-transparent shadow-sm',
+    secondary: 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm',
+    success: 'bg-green-600 text-white hover:bg-green-700 border border-transparent shadow-sm',
+    danger: 'bg-red-600 text-white hover:bg-red-700 border border-transparent shadow-sm',
+    warning: 'bg-yellow-500 text-white hover:bg-yellow-600 border border-transparent shadow-sm',
+    ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 border border-transparent'
   }[props.variant]
 })
 

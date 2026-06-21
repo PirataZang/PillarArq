@@ -1,6 +1,4 @@
 <script setup>
-import Breadcrumb from './Breadcrumb.vue'
-
 defineProps({
   sidebarOpen: {
     type: Boolean,
@@ -12,31 +10,33 @@ const emit = defineEmits(['toggleSidebar'])
 </script>
 
 <template>
-  <header class="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-200">
+  <header class="h-16 flex items-center justify-between px-6 bg-white border-b border-gray-200 shrink-0">
     <!-- Left side -->
     <div class="flex items-center flex-1">
       <button @click="emit('toggleSidebar')"
-        class="lg:hidden text-gray-500 hover:text-gray-900 focus:outline-none rounded-md mr-4">
+        class="lg:hidden text-gray-500 hover:text-indigo-600 focus:outline-none rounded-md mr-4">
         <i class="fa-solid fa-bars text-xl"></i>
       </button>
-      <div class="hidden sm:block">
-        <Breadcrumb />
-      </div>
     </div>
 
     <!-- Right side -->
-    <div class="flex items-center space-x-4">
-      <button class="text-gray-400 hover:text-gray-600 transition-colors">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </button>
-      <button class="text-gray-400 hover:text-gray-600 transition-colors relative">
-        <i class="fa-regular fa-bell"></i>
-        <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+    <div class="flex items-center space-x-6">
+      <button class="text-gray-400 hover:text-indigo-600 transition-colors relative focus:outline-none">
+        <i class="fa-solid fa-bell text-lg"></i>
+        <span class="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full bg-indigo-600 ring-2 ring-white"></span>
       </button>
 
-      <div
-        class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all">
-        <i class="fa-solid fa-user text-gray-600 text-sm"></i>
+      <div class="h-8 w-[1px] bg-gray-200"></div>
+
+      <div class="flex items-center gap-3 cursor-pointer group">
+        <div class="flex flex-col items-end">
+          <span class="text-sm font-semibold text-gray-900">master</span>
+          <span class="text-xs text-gray-500">Master</span>
+        </div>
+        <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm group-hover:ring-2 group-hover:ring-indigo-600 group-hover:ring-offset-2 transition-all">
+          M
+        </div>
+        <i class="fa-solid fa-chevron-down text-gray-400 text-xs ml-1 group-hover:text-gray-600 transition-colors"></i>
       </div>
     </div>
   </header>

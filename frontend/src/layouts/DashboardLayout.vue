@@ -13,7 +13,7 @@ const toggleSidebar = () => {
 <template>
   <div class="h-screen flex overflow-hidden bg-gray-50">
     <!-- Sidebar -->
-    <Sidebar :open="sidebarOpen" @close="sidebarOpen = false" />
+    <Sidebar :open="sidebarOpen" @close="sidebarOpen = false" @toggle="toggleSidebar" />
 
     <!-- Main Content wrapper -->
     <div class="flex-1 flex flex-col w-0 overflow-hidden">

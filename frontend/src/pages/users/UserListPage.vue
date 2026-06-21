@@ -9,7 +9,6 @@ const router = useRouter()
 const swal = useSwal()
 
 const columnDefs = [
-  { headerCheckboxSelection: true, checkboxSelection: true, width: 50, sortable: false, filter: false, pinned: 'left' },
   { field: 'id', headerName: 'ID', width: 90, filter: 'agNumberColumnFilter' },
   { field: 'name', headerName: 'Nome', flex: 1, filter: 'agTextColumnFilter' },
   { field: 'email', headerName: 'Email', flex: 1, filter: 'agTextColumnFilter' },

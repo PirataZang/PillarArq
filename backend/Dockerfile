@@ -12,5 +12,5 @@
     # O entrypoint será responsável por criar o projeto AdonisJS caso ele não exista
     ENTRYPOINT ["entrypoint.sh"]
 
-    # Comando padrão para rodar a aplicação em ambiente de desenvolvimento
+    # Inicia o servidor de desenvolvimento do AdonisJS
     CMD ["npm", "run", "dev"]

@@ -75,7 +75,7 @@ export default class AuthService {
   }
 
   /**
-   * Gera Access Token (15m) e Refresh Token (7d)
+   * Gera Access Token (7d) e Refresh Token (7d)
    */
   private async generateTokens(user: User) {
     const payload = {
@@ -84,7 +84,7 @@ export default class AuthService {
       role: user.role
     }
 
-    const accessToken = jwt.sign(payload, env.get('APP_KEY').release(), { expiresIn: '15m' })
+    const accessToken = jwt.sign(payload, env.get('APP_KEY').release(), { expiresIn: '7d' })
     const refreshTokenStr = crypto.randomBytes(40).toString('hex')
 
     // Salva o token de acesso ativo no usuário para controle de sessão única
@@ -102,7 +102,7 @@ export default class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshTokenStr,
-      expires_in: 900 // 15 minutos em segundos
+      expires_in: 604800 // 7 dias em segundos
     }
   }
 }

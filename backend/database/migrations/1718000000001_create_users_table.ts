@@ -13,7 +13,12 @@ export default class extends BaseSchema {
       table.string('password').notNullable()
       table.string('role').notNullable().defaultTo('USER')
       table.boolean('is_active').defaultTo(true).notNullable()
+      table.boolean('is_master').defaultTo(false).notNullable()
+      table.text('token').nullable()
       table.timestamp('last_login_at', { useTz: true }).nullable()
+
+      table.bigInteger('created_by').nullable().references('id').inTable('users').onDelete('SET NULL')
+      table.bigInteger('updated_by').nullable().references('id').inTable('users').onDelete('SET NULL')
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

@@ -66,6 +66,12 @@ export default class AuthService {
     await RefreshToken.query()
       .where('userId', userId)
       .update({ isRevoked: true })
+
+    const user = await User.find(userId)
+    if (user) {
+      user.token = null
+      await user.save()
+    }
   }
 
   /**
@@ -78,8 +84,12 @@ export default class AuthService {
       role: user.role
     }
 
-    const accessToken = jwt.sign(payload, env.get('APP_KEY'), { expiresIn: '15m' })
+    const accessToken = jwt.sign(payload, env.get('APP_KEY').release(), { expiresIn: '15m' })
     const refreshTokenStr = crypto.randomBytes(40).toString('hex')
+
+    // Salva o token de acesso ativo no usuário para controle de sessão única
+    user.token = accessToken
+    await user.save()
 
     // Salva o Refresh Token no banco de dados para revogação e validação
     await RefreshToken.create({

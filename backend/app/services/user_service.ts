@@ -1,5 +1,10 @@
 import User from '#models/user'
 import { DateTime } from 'luxon'
+import type { Infer } from '@vinejs/vine/types'
+import type { createUserValidator, updateUserValidator } from '#validators/user_validator'
+
+type CreateUserPayload = Infer<typeof createUserValidator>
+type UpdateUserPayload = Infer<typeof updateUserValidator>
 
 export default class UserService {
   /**
@@ -15,7 +20,7 @@ export default class UserService {
   /**
    * Cria um novo usuário garantindo o isolamento do tenant.
    */
-  async store(companyId: string, payload: any) {
+  async store(companyId: string, payload: CreateUserPayload) {
     return User.create({
       ...payload,
       companyId
@@ -25,7 +30,7 @@ export default class UserService {
   /**
    * Atualiza um usuário garantindo que pertence ao tenant atual.
    */
-  async update(companyId: string, userId: string, payload: any) {
+  async update(companyId: string, userId: string, payload: UpdateUserPayload) {
     const user = await User.query()
       .where('id', userId)
       .where('companyId', companyId)
@@ -52,3 +57,4 @@ export default class UserService {
     await user.save()
   }
 }
+

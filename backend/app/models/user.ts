@@ -26,6 +26,12 @@ export default class User extends BaseModel {
   @column()
   declare isActive: boolean
 
+  @column({ serializeAs: 'is_master' })
+  declare isMaster: boolean
+
+  @column({ serializeAs: null })
+  declare token: string | null
+
   @column.dateTime()
   declare lastLoginAt: DateTime | null
 
@@ -34,6 +40,12 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  @column()
+  declare createdBy: string | null
+
+  @column()
+  declare updatedBy: string | null
 
   @column.dateTime()
   declare deletedAt: DateTime | null

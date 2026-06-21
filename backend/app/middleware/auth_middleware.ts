@@ -19,13 +19,22 @@ export default class AuthMiddleware {
     const token = authHeader.split(' ')[1]
 
     try {
-      const decoded = jwt.verify(token, env.get('APP_KEY')) as { userId: string }
+      const decoded = jwt.verify(token, env.get('APP_KEY').release()) as any
       
       const user = await User.find(decoded.userId)
       if (!user || !user.isActive || user.deletedAt) {
         return ctx.response.status(401).send({
           success: false,
           message: 'Usuário não encontrado, inativo ou excluído',
+          errors: []
+        })
+      }
+
+      // Verifica se o token enviado corresponde ao token ativo armazenado no banco de dados (controle de sessão única)
+      if (!user.token || user.token !== token) {
+        return ctx.response.status(401).send({
+          success: false,
+          message: 'Sessão inválida ou expirada. Por favor, faça login novamente.',
           errors: []
         })
       }

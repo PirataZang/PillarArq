@@ -4,6 +4,8 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import stringHelpers from '@adonisjs/core/helpers/string'
 
+import { fileURLToPath } from 'node:url'
+
 export default class MakeEntity extends BaseCommand {
   static commandName = 'make:entity'
   static description = 'Creates a complete architectural boilerplate for a given entity'
@@ -23,7 +25,7 @@ export default class MakeEntity extends BaseCommand {
     const tableName = stringHelpers.snakeCase(stringHelpers.plural(this.name))
     const varName = stringHelpers.camelCase(entityName)
 
-    const baseDir = this.app.appRoot
+    const baseDir = fileURLToPath(this.app.appRoot)
     
     // Define all file paths
     const files = {
@@ -238,6 +240,6 @@ export default class extends BaseSchema {
     await writeFile(files.filters, filtersTemplate)
     await writeFile(files.migration, migrationTemplate)
 
-    this.logger.success(\`Entity \${entityName} boilerplate created successfully!\`)
+    this.logger.success(`Entity ${entityName} boilerplate created successfully!`)
   }
 }

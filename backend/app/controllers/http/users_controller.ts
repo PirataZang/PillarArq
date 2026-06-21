@@ -1,12 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import UserService from '#services/user_service'
 import { createUserValidator, updateUserValidator } from '#validators/user_validator'
+import User from '#models/user'
 
 export default class UsersController {
   private userService = new UserService()
 
   async index({ auth, response }: HttpContext) {
-    const companyId = auth.user!.companyId
+    const companyId = (auth.user as User).companyId
     const users = await this.userService.index(companyId)
 
     return response.ok({
@@ -17,7 +18,7 @@ export default class UsersController {
   }
 
   async store({ auth, request, response }: HttpContext) {
-    const companyId = auth.user!.companyId
+    const companyId = (auth.user as User).companyId
     const payload = await request.validateUsing(createUserValidator)
 
     const user = await this.userService.store(companyId, payload)
@@ -30,7 +31,7 @@ export default class UsersController {
   }
 
   async update({ auth, request, params, response }: HttpContext) {
-    const companyId = auth.user!.companyId
+    const companyId = (auth.user as User).companyId
     const payload = await request.validateUsing(updateUserValidator)
 
     const user = await this.userService.update(companyId, params.id, payload)
@@ -43,7 +44,7 @@ export default class UsersController {
   }
 
   async destroy({ auth, params, response }: HttpContext) {
-    const companyId = auth.user!.companyId
+    const companyId = (auth.user as User).companyId
 
     await this.userService.destroy(companyId, params.id)
 

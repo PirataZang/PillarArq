@@ -24,12 +24,11 @@ const handleLogin = async () => {
   loading.value = true
   
   try {
-    // Simulando login se a API não estiver pronta
-    // await authStore.login(form)
-    
-    // Mock forzando sucesso para testes visuais:
-    authStore.token = 'mock_token_123'
-    authStore.user = { name: 'Admin', email: form.email }
+    // Realiza o login real chamando a API do backend
+    await authStore.login({
+      email: form.email,
+      password: form.password
+    })
     
     router.push('/dashboard')
   } catch (err) {

@@ -92,6 +92,7 @@ api.interceptors.response.use(
         } else {
           // Fallback se o refresh falhar
           processQueue(new Error('Refresh failed'))
+          authStore.logout()
           window.location.href = '/login'
         }
       } catch (err) {

@@ -14,27 +14,27 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Ações
   async function login(credentials) {
-    const { data } = await api.post('/login', credentials)
+    const response = await api.post('/auth/login', credentials)
+    const result = response.data.data
     
-    // Supondo que a API retorna o token e o usuário
-    token.value = data.token
-    if (data.refreshToken) {
-      refreshTokenKey.value = data.refreshToken
+    token.value = result.access_token
+    if (result.refresh_token) {
+      refreshTokenKey.value = result.refresh_token
     }
-    user.value = data.user
+    
+    await me()
   }
 
   function logout() {
     token.value = null
     refreshTokenKey.value = null
     user.value = null
-    // Redirecionamento pode ser feito no componente ou router
   }
 
   async function me() {
     try {
-      const { data } = await api.get('/me')
-      user.value = data
+      const response = await api.get('/auth/me')
+      user.value = response.data.data
     } catch (error) {
       logout()
     }
@@ -44,10 +44,11 @@ export const useAuthStore = defineStore('auth', () => {
     if (!refreshTokenKey.value) return false
     
     try {
-      const { data } = await api.post('/refresh', {
+      const response = await api.post('/auth/refresh', {
         refresh_token: refreshTokenKey.value
       })
-      token.value = data.token
+      const result = response.data.data
+      token.value = result.access_token
       return true
     } catch (error) {
       logout()

@@ -8,7 +8,7 @@ export default class User extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ serializeAs: 'company_id' })
   declare companyId: string
 
   @column()
@@ -23,35 +23,54 @@ export default class User extends BaseModel {
   @column()
   declare role: string
 
-  @column()
+  @column({ serializeAs: 'active' })
   declare isActive: boolean
 
-  @column({ serializeAs: 'is_master' })
+  @column({ serializeAs: 'master' })
   declare isMaster: boolean
 
   @column({ serializeAs: null })
   declare token: string | null
 
-  @column.dateTime()
+  @column.dateTime({ serializeAs: 'last_login_at' })
   declare lastLoginAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, serializeAs: 'created_at' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: 'updated_at' })
   declare updatedAt: DateTime
 
-  @column()
+  @column({ serializeAs: 'created_by' })
   declare createdBy: string | null
 
-  @column()
+  @column({ serializeAs: 'updated_by' })
   declare updatedBy: string | null
 
-  @column.dateTime()
+  @column.dateTime({ serializeAs: 'deleted_at' })
   declare deletedAt: DateTime | null
 
   @belongsTo(() => Company)
   declare company: BelongsTo<typeof Company>
+
+  // Colunas para ocultar na serialização (como no Laravel)
+  static get hidden() {
+    return ['password', 'token']
+  }
+
+  serialize(cherryPick?: any) {
+    const data = super.serialize(cherryPick)
+    const hiddenFields = (this.constructor as typeof User).hidden
+    if (hiddenFields) {
+      for (const field of hiddenFields) {
+        delete data[field]
+        // Remove também variações camelCase ou snake_case se houver
+        delete data[field.replace(/_([a-z])/g, (g) => g[1].toUpperCase())]
+        delete data[field.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)]
+      }
+    }
+    return data
+  }
 
   @beforeSave()
   static async hashPassword(user: User) {

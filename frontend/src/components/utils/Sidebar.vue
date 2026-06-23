@@ -42,7 +42,10 @@ const isActive = (href) => {
 </script>
 
 <template>
-  <div class="relative lg:w-[88px] shrink-0 h-full">
+  <div :class="[
+    open ? 'lg:w-[280px]' : 'lg:w-[88px]',
+    'relative shrink-0 h-full transition-all duration-300 ease-in-out'
+  ]">
     <!-- Desktop Invisible Overlay to catch outside clicks when open -->
     <div v-if="open" class="fixed inset-0 z-40 hidden lg:block" @click="emit('close')"></div>
 
@@ -85,7 +88,7 @@ const isActive = (href) => {
               <i :class="[isActive(item.href) ? 'text-indigo-400' : 'text-gray-400 group-hover:text-gray-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
             </span>
             <span :class="[
-              open ? 'opacity-100 max-w-48 ml-3' : 'opacity-0 max-w-0 overflow-hidden',
+              open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
               'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
             ]">{{ item.name }}</span>
           </router-link>
@@ -100,7 +103,7 @@ const isActive = (href) => {
                 <i :class="[openMenus.includes(item.id) && open ? 'text-white' : 'text-gray-400 group-hover:text-gray-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
               </span>
               <span :class="[
-                open ? 'opacity-100 max-w-40 ml-3' : 'opacity-0 max-w-0 overflow-hidden',
+                open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
                 'transition-all duration-300 ease-in-out whitespace-nowrap truncate flex-1 text-left'
               ]">{{ item.name }}</span>
               <i :class="[
@@ -111,7 +114,7 @@ const isActive = (href) => {
             </button>
 
             <!-- Submenu Items -->
-            <div v-show="openMenus.includes(item.id)" class="space-y-1 mt-1 mb-2 transition-all duration-300" :class="open ? 'pl-4 pr-0' : 'px-0'">
+            <div v-show="openMenus.includes(item.id)" class="space-y-1 mt-1 mb-2 transition-all duration-300 ease-in-out" :class="open ? 'pl-4' : 'pl-0'">
               <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href" :title="!open ? subItem.name : ''" :class="[
                 isActive(subItem.href)
                   ? 'bg-indigo-900/40 text-indigo-100'
@@ -122,7 +125,7 @@ const isActive = (href) => {
                   <i :class="[isActive(subItem.href) ? 'text-indigo-400' : 'text-gray-500 group-hover:text-gray-300', subItem.icon, 'fa-fw text-base text-center transition-colors']"></i>
                 </span>
                 <span :class="[
-                  open ? 'opacity-100 max-w-40 ml-3' : 'opacity-0 max-w-0 overflow-hidden',
+                  open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
                   'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
                 ]">{{ subItem.name }}</span>
               </router-link>

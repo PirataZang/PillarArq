@@ -4,11 +4,13 @@ RUN apk add --no-cache bash git
 
 WORKDIR /app
 
+COPY package.json package-lock.json ./
+RUN npm ci
+
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 5173
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-# Inicia o servidor de desenvolvimento do Vite (acessível externamente via --host)
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--config", "vite.config.js"]

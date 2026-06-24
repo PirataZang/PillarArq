@@ -1,4 +1,7 @@
 <script setup>
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/auth.store'
+
 defineProps({
   sidebarOpen: {
     type: Boolean,
@@ -7,6 +10,11 @@ defineProps({
 })
 
 const emit = defineEmits(['toggleSidebar'])
+const authStore = useAuthStore()
+
+const userName = computed(() => authStore.user?.name ?? 'Usuário')
+const userRole = computed(() => authStore.user?.role ?? '')
+const userInitial = computed(() => userName.value.charAt(0).toUpperCase())
 </script>
 
 <template>
@@ -30,11 +38,11 @@ const emit = defineEmits(['toggleSidebar'])
 
       <div class="flex items-center gap-3 cursor-pointer group">
         <div class="flex flex-col items-end">
-          <span class="text-sm font-semibold text-gray-900">master</span>
-          <span class="text-xs text-gray-500">Master</span>
+          <span class="text-sm font-semibold text-gray-900">{{ userName }}</span>
+          <span class="text-xs text-gray-500 capitalize">{{ userRole }}</span>
         </div>
         <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm group-hover:ring-2 group-hover:ring-indigo-600 group-hover:ring-offset-2 transition-all">
-          M
+          {{ userInitial }}
         </div>
         <i class="fa-solid fa-chevron-down text-gray-400 text-xs ml-1 group-hover:text-gray-600 transition-colors"></i>
       </div>

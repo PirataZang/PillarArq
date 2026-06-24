@@ -26,6 +26,7 @@ services:
       - HOST
       - LOG_LEVEL
       - APP_KEY
+      - JWT_SECRET
       - DB_HOST
       - DB_PORT
       - DB_USER
@@ -67,7 +68,8 @@ services:
       - NODE_ENV
       - CHOKIDAR_USEPOLLING=true
       - VITE_APP_NAME=${PROJECT_NAME:-PillarARQ}
-      - VITE_API_URL=${VITE_API_URL:-http://localhost:3333/api/v1}
+      - VITE_API_URL=/api/v1
+      - VITE_API_PROXY_TARGET=http://backend:3333
 
     depends_on:
       - backend

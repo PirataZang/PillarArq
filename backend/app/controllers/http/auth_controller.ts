@@ -1,7 +1,17 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import app from '@adonisjs/core/services/app'
 import AuthService from '#services/auth_service'
 import { loginValidator, refreshTokenValidator } from '#validators/auth_validator'
 import User from '#models/user'
+import { AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, serializeUser } from '#utils/auth'
+
+const authCookieOptions = {
+  httpOnly: true,
+  maxAge: AUTH_COOKIE_MAX_AGE,
+  sameSite: 'lax' as const,
+  secure: app.inProduction,
+  path: '/',
+}
 
 export default class AuthController {
   private authService = new AuthService()
@@ -15,14 +25,19 @@ export default class AuthController {
       return response.status(401).send({
         success: false,
         message: 'Credenciais inválidas',
-        errors: []
+        errors: [],
       })
     }
+
+    response.cookie(AUTH_COOKIE_NAME, result.access_token, authCookieOptions)
 
     return response.ok({
       success: true,
       message: 'Login realizado com sucesso',
-      data: result
+      data: {
+        user: result.user,
+        expires_in: result.expires_in,
+      },
     })
   }
 
@@ -35,14 +50,19 @@ export default class AuthController {
       return response.status(401).send({
         success: false,
         message: 'Refresh token inválido ou expirado',
-        errors: []
+        errors: [],
       })
     }
+
+    response.cookie(AUTH_COOKIE_NAME, result.access_token, authCookieOptions)
 
     return response.ok({
       success: true,
       message: 'Token atualizado com sucesso',
-      data: result
+      data: {
+        user: result.user,
+        expires_in: result.expires_in,
+      },
     })
   }
 
@@ -50,10 +70,12 @@ export default class AuthController {
     const user = auth.user as User
     await this.authService.logout(user.id)
 
+    response.clearCookie(AUTH_COOKIE_NAME, { path: '/' })
+
     return response.ok({
       success: true,
       message: 'Logout realizado com sucesso',
-      data: {}
+      data: {},
     })
   }
 
@@ -63,14 +85,7 @@ export default class AuthController {
     return response.ok({
       success: true,
       message: 'Dados do usuário autenticado',
-      data: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        is_master: user.isMaster,
-        company_id: user.companyId
-      }
+      data: serializeUser(user),
     })
   }
 }

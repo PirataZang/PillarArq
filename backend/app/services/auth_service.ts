@@ -1,14 +1,14 @@
 import User from '#models/user'
 import RefreshToken from '#models/refresh_token'
 import jwt from 'jsonwebtoken'
-import env from '#start/env'
 import hash from '@adonisjs/core/services/hash'
 import { DateTime } from 'luxon'
 import crypto from 'crypto'
+import { AUTH_COOKIE_MAX_AGE, getJwtSecret, serializeUser } from '#utils/auth'
 
 export default class AuthService {
   /**
-   * Valida credenciais e retorna tokens de acesso
+   * Valida credenciais e retorna tokens de acesso + usuário do BD
    */
   async login(email: string, passwordPlain: string) {
     const user = await User.query()
@@ -26,11 +26,15 @@ export default class AuthService {
       return null
     }
 
-    // Atualiza o último login
     user.lastLoginAt = DateTime.now()
     await user.save()
 
-    return this.generateTokens(user)
+    const tokens = await this.generateTokens(user)
+
+    return {
+      ...tokens,
+      user: serializeUser(user),
+    }
   }
 
   /**
@@ -52,20 +56,22 @@ export default class AuthService {
       return null
     }
 
-    // Revoga o refresh token usado
     refreshToken.isRevoked = true
     await refreshToken.save()
 
-    return this.generateTokens(user)
+    const tokens = await this.generateTokens(user)
+
+    return {
+      ...tokens,
+      user: serializeUser(user),
+    }
   }
 
   /**
-   * Revoga todos os refresh tokens de um usuário ou um específico
+   * Revoga todos os refresh tokens e invalida a sessão ativa
    */
   async logout(userId: string) {
-    await RefreshToken.query()
-      .where('userId', userId)
-      .update({ isRevoked: true })
+    await RefreshToken.query().where('userId', userId).update({ isRevoked: true })
 
     const user = await User.find(userId)
     if (user) {
@@ -78,31 +84,31 @@ export default class AuthService {
    * Gera Access Token (7d) e Refresh Token (7d)
    */
   private async generateTokens(user: User) {
+    await RefreshToken.query().where('userId', user.id).update({ isRevoked: true })
+
     const payload = {
       userId: user.id,
       companyId: user.companyId,
-      role: user.role
+      role: user.role,
     }
 
-    const accessToken = jwt.sign(payload, env.get('APP_KEY').release(), { expiresIn: '7d' })
+    const accessToken = jwt.sign(payload, getJwtSecret(), { expiresIn: '7d' })
     const refreshTokenStr = crypto.randomBytes(40).toString('hex')
 
-    // Salva o token de acesso ativo no usuário para controle de sessão única
     user.token = accessToken
     await user.save()
 
-    // Salva o Refresh Token no banco de dados para revogação e validação
     await RefreshToken.create({
       userId: user.id,
       token: refreshTokenStr,
       expiresAt: DateTime.now().plus({ days: 7 }),
-      isRevoked: false
+      isRevoked: false,
     })
 
     return {
       access_token: accessToken,
       refresh_token: refreshTokenStr,
-      expires_in: 604800 // 7 dias em segundos
+      expires_in: AUTH_COOKIE_MAX_AGE,
     }
   }
 }

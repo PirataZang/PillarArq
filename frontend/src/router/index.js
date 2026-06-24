@@ -14,7 +14,7 @@ import ComponentsTestPage from '@/pages/ComponentsTest.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard'
+    redirect: '/dashboard',
   },
   {
     path: '/',
@@ -24,9 +24,9 @@ const routes = [
         path: 'login',
         name: 'login',
         component: LoginPage,
-        meta: { guest: true }
-      }
-    ]
+        meta: { guest: true },
+      },
+    ],
   },
   {
     path: '/',
@@ -36,50 +36,67 @@ const routes = [
       {
         path: 'dashboard',
         name: 'dashboard',
-        component: DashboardPage
+        component: DashboardPage,
       },
       {
         path: 'users',
         name: 'users.list',
-        component: UserListPage
+        component: UserListPage,
       },
       {
         path: 'users/create',
         name: 'users.create',
-        component: UserCreatePage
+        component: UserCreatePage,
       },
       {
         path: 'users/:id/edit',
         name: 'users.edit',
-        component: UserEditPage
-      }
-    ]
+        component: UserEditPage,
+      },
+      {
+        path: 'components-test',
+        name: 'components.test',
+        component: ComponentsTestPage,
+      },
+    ],
   },
-  {
-    path: '/components-test',
-    name: 'components.test',
-    component: ComponentsTestPage
-  }
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
+  routes,
 })
 
-// Navigation Guards
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
-  const isAuthenticated = authStore.isAuthenticated
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    // Requer autenticação e não está logado -> Login
-    next({ name: 'login' })
-  } else if (to.meta.guest && isAuthenticated) {
-    // Rota só para convidados (login) mas já está logado -> Dashboard
-    next({ name: 'dashboard' })
-  } else {
-    next()
+  if (to.meta.requiresAuth) {
+    if (!authStore.user) {
+      authStore.hydrateFromCookie()
+    }
+
+    if (!authStore.user || authStore.isUserExpired()) {
+      authStore.clearSession()
+      return { name: 'login' }
+    }
+
+    const valid = await authStore.validateSession()
+    if (!valid) {
+      return { name: 'login' }
+    }
+  }
+
+  if (to.meta.guest) {
+    if (!authStore.user) {
+      authStore.hydrateFromCookie()
+    }
+
+    if (authStore.user && !authStore.isUserExpired()) {
+      const valid = await authStore.validateSession()
+      if (valid) {
+        return { name: 'dashboard' }
+      }
+    }
   }
 })
 

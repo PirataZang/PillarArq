@@ -13,7 +13,7 @@ const columnDefs = [
   { field: 'id', headerName: 'ID', width: 90, filter: 'agNumberColumnFilter' },
   { field: 'name', headerName: 'Nome', flex: 1, filter: 'agTextColumnFilter' },
   { field: 'email', headerName: 'Email', flex: 1, filter: 'agTextColumnFilter' },
-  { field: 'active', headerName: 'Ativo', width: 120, valueFormatter: (params) => params.value ? 'Sim' : 'Não', filter: 'agSetColumnFilter', filterParams: { values: [true, false], valueFormatter: (params) => params.value ? 'Sim' : 'Não' } },
+  { field: 'active', headerName: 'Ativo', width: 120, valueFormatter: (params) => params.value ? 'Sim' : 'Não', filter: 'agTextColumnFilter', filterValueGetter: (params) => (params.data?.active ? 'Sim' : 'Não') },
   { field: 'created_at', headerName: 'Cadastrado em', type: 'date', width: 180 }
 ]
 
@@ -73,24 +73,25 @@ const confirmDelete = async () => {
 <template>
   <div>
     <div class="sm:flex sm:items-center sm:justify-between mb-8">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Usuários</h1>
-        <p class="mt-1 text-sm text-gray-500">Gerencie os usuários do escritório e suas permissões.</p>
-      </div>
-      <div class="mt-4 sm:mt-0 flex gap-2">
-        <Button v-if="selectedUsers.length > 0" variant="ghost"
-          class="text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200" @click="confirmDelete">
-          <i class="fa-solid fa-trash mr-2"></i>
-          Excluir Selecionados
-        </Button>
-        <Button v-if="selectedUsers.length === 1" variant="ghost" class="border border-gray-200" @click="goToEdit">
-          <i class="fa-solid fa-pen mr-2"></i>
-          Editar
-        </Button>
-        <Button variant="primary" @click="goToCreate">
-          <i class="fa-solid fa-plus mr-2"></i>
-          Novo Usuário
-        </Button>
+      <div class="flex items-start flex-col gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Usuários</h1>
+          <p class="mt-1 text-sm text-gray-500">Gerencie os usuários do escritório e suas permissões.</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex gap-2">
+          <Button variant="primary" @click="goToCreate">
+            <i class="fa-solid fa-plus mr-2"></i>
+            Novo Usuário
+          </Button>
+          <Button :disabled="selectedUsers.length !== 1" variant="success" @click="goToEdit">
+            <i class="fa-solid fa-pen mr-2"></i>
+            Editar
+          </Button>
+          <Button :disabled="selectedUsers.length === 0" variant="danger" @click="confirmDelete">
+            <i class="fa-solid fa-trash mr-2"></i>
+            Excluir Selecionados
+          </Button>
+        </div>
       </div>
     </div>
 

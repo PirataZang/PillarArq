@@ -34,10 +34,10 @@ if [ ! -f "package.json" ]; then
   echo "=========================================="
 fi
 
-# Instala dependências caso o node_modules não exista
-if [ ! -d "node_modules" ]; then
+# Volume anônimo pode criar node_modules vazio; verifica pacote real
+if [ ! -d "node_modules/vite" ]; then
   echo "Instalando dependências do projeto..."
-  npm install || true
+  npm install
 fi
 
 echo "Iniciando a aplicação..."

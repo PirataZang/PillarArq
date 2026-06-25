@@ -10,6 +10,7 @@ export type ScannedRoutes = {
     'auth.logout': { paramsTuple?: []; params?: {} }
     'auth.me': { paramsTuple?: []; params?: {} }
     'users.index': { paramsTuple?: []; params?: {} }
+    'users.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.store': { paramsTuple?: []; params?: {} }
     'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -24,10 +25,12 @@ export type ScannedRoutes = {
   GET: {
     'auth.me': { paramsTuple?: []; params?: {} }
     'users.index': { paramsTuple?: []; params?: {} }
+    'users.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   HEAD: {
     'auth.me': { paramsTuple?: []; params?: {} }
     'users.index': { paramsTuple?: []; params?: {} }
+    'users.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PUT: {
     'users.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

@@ -13,6 +13,7 @@ export interface ApiDefinition {
   }
   users: {
     index: typeof routes['users.index']
+    show: typeof routes['users.show']
     store: typeof routes['users.store']
     update: typeof routes['users.update']
     destroy: typeof routes['users.destroy']

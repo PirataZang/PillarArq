@@ -7,8 +7,7 @@ import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import LoginPage from '@/pages/auth/LoginPage.vue'
 import DashboardPage from '@/pages/dashboard/DashboardPage.vue'
 import UserListPage from '@/pages/users/UserListPage.vue'
-import UserCreatePage from '@/pages/users/UserCreatePage.vue'
-import UserEditPage from '@/pages/users/UserEditPage.vue'
+import UserFormPage from '@/pages/users/UserFormPage.vue'
 import ComponentsTestPage from '@/pages/ComponentsTest.vue'
 
 const routes = [
@@ -46,12 +45,12 @@ const routes = [
       {
         path: 'users/create',
         name: 'users.create',
-        component: UserCreatePage,
+        component: UserFormPage,
       },
       {
-        path: 'users/:id/edit',
+        path: 'users/:id',
         name: 'users.edit',
-        component: UserEditPage,
+        component: UserFormPage,
       },
       {
         path: 'components-test',

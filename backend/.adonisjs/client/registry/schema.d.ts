@@ -79,6 +79,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/http/users_controller').default['index']>>>
     }
   }
+  'users.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/users/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/http/users_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/http/users_controller').default['show']>>>
+    }
+  }
   'users.store': {
     methods: ["POST"]
     pattern: '/api/v1/users'

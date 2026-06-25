@@ -46,7 +46,7 @@ const goToCreate = () => {
 
 const goToEdit = () => {
   if (selectedUsers.value.length === 1) {
-    router.push(`/users/${selectedUsers.value[0].id}/edit`)
+    router.push(`/users/${selectedUsers.value[0].id}`)
   }
 }
 

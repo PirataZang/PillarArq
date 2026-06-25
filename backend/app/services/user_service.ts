@@ -18,6 +18,17 @@ export default class UserService {
   }
 
   /**
+   * Retorna um usuário pelo ID garantindo isolamento de tenant.
+   */
+  async show(companyId: string, userId: string) {
+    return User.query()
+      .where('id', userId)
+      .where('companyId', companyId)
+      .whereNull('deletedAt')
+      .firstOrFail()
+  }
+
+  /**
    * Cria um novo usuário garantindo o isolamento do tenant.
    */
   async store(companyId: string, payload: CreateUserPayload) {
@@ -36,7 +47,13 @@ export default class UserService {
       .where('companyId', companyId)
       .firstOrFail()
 
-    user.merge(payload)
+    const { is_active, ...rest } = payload
+    const updateData = {
+      ...rest,
+      ...(is_active !== undefined ? { isActive: is_active } : {})
+    }
+
+    user.merge(updateData)
     await user.save()
 
     return user

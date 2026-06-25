@@ -17,6 +17,17 @@ export default class UsersController {
     })
   }
 
+  async show({ auth, params, response }: HttpContext) {
+    const companyId = (auth.user as User).companyId
+    const user = await this.userService.show(companyId, params.id)
+
+    return response.ok({
+      success: true,
+      message: 'Usuário detalhado com sucesso',
+      data: user
+    })
+  }
+
   async store({ auth, request, response }: HttpContext) {
     const companyId = (auth.user as User).companyId
     const payload = await request.validateUsing(createUserValidator)

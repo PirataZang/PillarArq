@@ -8,5 +8,11 @@ export const controllers = {
     Auth: () => import('#controllers/http/auth_controller'),
     Companies: () => import('#controllers/http/companies_controller'),
     Users: () => import('#controllers/http/users_controller'),
+    Clients: () => import('#controllers/http/clients_controller'),
+    Projects: () => import('#controllers/http/projects_controller'),
+    ProjectMaterials: () => import('#controllers/http/project_materials_controller'),
+    ProjectExpenses: () => import('#controllers/http/project_expenses_controller'),
+    ProjectPhases: () => import('#controllers/http/project_phases_controller'),
+    ProjectNotes: () => import('#controllers/http/project_notes_controller'),
   },
 }

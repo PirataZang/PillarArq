@@ -4,6 +4,12 @@ import { middleware } from '#start/kernel'
 const AuthController = () => import('#controllers/http/auth_controller')
 const UsersController = () => import('#controllers/http/users_controller')
 const CompaniesController = () => import('#controllers/http/companies_controller')
+const ClientsController = () => import('#controllers/http/clients_controller')
+const ProjectsController = () => import('#controllers/http/projects_controller')
+const ProjectMaterialsController = () => import('#controllers/http/project_materials_controller')
+const ProjectExpensesController = () => import('#controllers/http/project_expenses_controller')
+const ProjectPhasesController = () => import('#controllers/http/project_phases_controller')
+const ProjectNotesController = () => import('#controllers/http/project_notes_controller')
 
 router.group(() => {
 
@@ -14,7 +20,6 @@ router.group(() => {
 
   router.post('/companies', [CompaniesController, 'store'])
 
-  // Rotas protegidas (Requer autenticação JWT)
   router.group(() => {
     
     router.group(() => {
@@ -22,7 +27,6 @@ router.group(() => {
       router.get('/me', [AuthController, 'me'])
     }).prefix('/auth')
 
-    // Rotas de Tenant (Empresa) - Garante isolamento Multi-Tenant
     router.group(() => {
       
       router.get('/users', [UsersController, 'index'])
@@ -30,6 +34,36 @@ router.group(() => {
       router.post('/users', [UsersController, 'store'])
       router.put('/users/:id', [UsersController, 'update'])
       router.delete('/users/:id', [UsersController, 'destroy'])
+
+      router.get('/clients', [ClientsController, 'index'])
+      router.get('/clients/:id', [ClientsController, 'show'])
+      router.post('/clients', [ClientsController, 'store'])
+      router.put('/clients/:id', [ClientsController, 'update'])
+      router.delete('/clients/:id', [ClientsController, 'destroy'])
+
+      router.get('/projects', [ProjectsController, 'index'])
+      router.post('/projects', [ProjectsController, 'store'])
+
+      router.get('/projects/:projectId/materials', [ProjectMaterialsController, 'index'])
+      router.post('/projects/:projectId/materials', [ProjectMaterialsController, 'store'])
+      router.put('/projects/:projectId/materials/:id', [ProjectMaterialsController, 'update'])
+      router.delete('/projects/:projectId/materials/:id', [ProjectMaterialsController, 'destroy'])
+
+      router.get('/projects/:projectId/expenses', [ProjectExpensesController, 'index'])
+      router.post('/projects/:projectId/expenses', [ProjectExpensesController, 'store'])
+      router.put('/projects/:projectId/expenses/:id', [ProjectExpensesController, 'update'])
+      router.delete('/projects/:projectId/expenses/:id', [ProjectExpensesController, 'destroy'])
+
+      router.get('/projects/:projectId/phases', [ProjectPhasesController, 'index'])
+      router.patch('/projects/:projectId/phases/:id', [ProjectPhasesController, 'update'])
+
+      router.get('/projects/:projectId/notes', [ProjectNotesController, 'index'])
+      router.post('/projects/:projectId/notes', [ProjectNotesController, 'store'])
+      router.delete('/projects/:projectId/notes/:id', [ProjectNotesController, 'destroy'])
+
+      router.get('/projects/:id', [ProjectsController, 'show'])
+      router.put('/projects/:id', [ProjectsController, 'update'])
+      router.delete('/projects/:id', [ProjectsController, 'destroy'])
 
     }).use(middleware.tenant())
 

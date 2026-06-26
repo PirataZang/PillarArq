@@ -25,6 +25,8 @@ const handleAccordionClick = (menuId) => {
 
 const navigation = ref([
   { id: 'dashboard', name: 'Dashboard', href: '/dashboard', icon: 'fa-solid fa-chart-pie' },
+  { id: 'projects', name: 'Obras', href: '/projects', icon: 'fa-solid fa-building' },
+  { id: 'clients', name: 'Clientes', href: '/clients', icon: 'fa-solid fa-user-tie' },
   { id: 'users', name: 'Usuários', href: '/users', icon: 'fa-solid fa-users' },
   {
     id: 'finance', name: 'Financeiro', icon: 'fa-solid fa-dollar-sign',

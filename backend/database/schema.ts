@@ -7,6 +7,41 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class ClientSchema extends BaseModel {
+  static $columns = ['address', 'companyId', 'createdAt', 'createdBy', 'deletedAt', 'document', 'email', 'id', 'isActive', 'name', 'notes', 'phone', 'serviceRatePerM2', 'updatedAt', 'updatedBy'] as const
+  $columns = ClientSchema.$columns
+  @column()
+  declare address: string | null
+  @column()
+  declare companyId: bigint | number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdBy: bigint | number | null
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column()
+  declare document: string | null
+  @column()
+  declare email: string | null
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare isActive: boolean
+  @column()
+  declare name: string
+  @column()
+  declare notes: string | null
+  @column()
+  declare phone: string | null
+  @column()
+  declare serviceRatePerM2: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare updatedBy: bigint | number | null
+}
+
 export class CompanySchema extends BaseModel {
   static $columns = ['createdAt', 'deletedAt', 'id', 'isActive', 'name', 'slug', 'updatedAt'] as const
   $columns = CompanySchema.$columns
@@ -24,6 +59,143 @@ export class CompanySchema extends BaseModel {
   declare slug: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+}
+
+export class ProjectExpenseSchema extends BaseModel {
+  static $columns = ['amount', 'category', 'companyId', 'createdAt', 'description', 'expenseDate', 'id', 'projectId', 'updatedAt'] as const
+  $columns = ProjectExpenseSchema.$columns
+  @column()
+  declare amount: string
+  @column()
+  declare category: string
+  @column()
+  declare companyId: bigint | number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string
+  @column.date()
+  declare expenseDate: DateTime
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare projectId: bigint | number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+}
+
+export class ProjectMaterialSchema extends BaseModel {
+  static $columns = ['companyId', 'createdAt', 'id', 'name', 'projectId', 'quantity', 'sortOrder', 'supplier', 'unit', 'unitPrice', 'updatedAt'] as const
+  $columns = ProjectMaterialSchema.$columns
+  @column()
+  declare companyId: bigint | number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare name: string
+  @column()
+  declare projectId: bigint | number
+  @column()
+  declare quantity: string
+  @column()
+  declare sortOrder: number
+  @column()
+  declare supplier: string | null
+  @column()
+  declare unit: string
+  @column()
+  declare unitPrice: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+}
+
+export class ProjectNoteSchema extends BaseModel {
+  static $columns = ['companyId', 'content', 'createdAt', 'createdBy', 'id', 'projectId', 'updatedAt'] as const
+  $columns = ProjectNoteSchema.$columns
+  @column()
+  declare companyId: bigint | number
+  @column()
+  declare content: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdBy: bigint | number | null
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare projectId: bigint | number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+}
+
+export class ProjectPhaseSchema extends BaseModel {
+  static $columns = ['companyId', 'completedAt', 'createdAt', 'id', 'isCompleted', 'name', 'projectId', 'sortOrder', 'updatedAt', 'weightPercent'] as const
+  $columns = ProjectPhaseSchema.$columns
+  @column()
+  declare companyId: bigint | number
+  @column.dateTime()
+  declare completedAt: DateTime | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare isCompleted: boolean
+  @column()
+  declare name: string
+  @column()
+  declare projectId: bigint | number
+  @column()
+  declare sortOrder: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare weightPercent: number
+}
+
+export class ProjectSchema extends BaseModel {
+  static $columns = ['address', 'areaM2', 'assignedUserId', 'clientId', 'companyId', 'createdAt', 'createdBy', 'deletedAt', 'description', 'expectedEndDate', 'extraAmount', 'id', 'name', 'progressPercent', 'serviceRateOverride', 'startDate', 'status', 'updatedAt', 'updatedBy'] as const
+  $columns = ProjectSchema.$columns
+  @column()
+  declare address: string | null
+  @column()
+  declare areaM2: string
+  @column()
+  declare assignedUserId: bigint | number | null
+  @column()
+  declare clientId: bigint | number
+  @column()
+  declare companyId: bigint | number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdBy: bigint | number | null
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column()
+  declare description: string | null
+  @column.date()
+  declare expectedEndDate: DateTime | null
+  @column()
+  declare extraAmount: string
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare name: string
+  @column()
+  declare progressPercent: number
+  @column()
+  declare serviceRateOverride: string | null
+  @column.date()
+  declare startDate: DateTime | null
+  @column()
+  declare status: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare updatedBy: bigint | number | null
 }
 
 export class RefreshTokenSchema extends BaseModel {

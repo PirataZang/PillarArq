@@ -10,7 +10,7 @@
       <!-- 1. Buttons -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
+          <div class="w-2 h-6 bg-marble-600 rounded-full"></div>
           Buttons
         </h2>
         
@@ -50,7 +50,7 @@
       <!-- 2. Inputs & Textareas -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
+          <div class="w-2 h-6 bg-marble-600 rounded-full"></div>
           Inputs & Textareas
         </h2>
         
@@ -69,7 +69,7 @@
       <!-- 3. Select (AgGrid Tailwind Style) -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
+          <div class="w-2 h-6 bg-marble-600 rounded-full"></div>
           Select Customizado
         </h2>
         
@@ -110,7 +110,7 @@
       <!-- 4. Switches, Checkboxes & Radios -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
+          <div class="w-2 h-6 bg-marble-600 rounded-full"></div>
           Toggles & Checks
         </h2>
         
@@ -141,7 +141,7 @@
       <!-- 5. Card & EmptyState -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
+          <div class="w-2 h-6 bg-marble-600 rounded-full"></div>
           Layout & Data Display
         </h2>
         
@@ -168,7 +168,7 @@
       <!-- 6. Modal & SweetAlert2 -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
+          <div class="w-2 h-6 bg-marble-600 rounded-full"></div>
           Modais & Alertas (SweetAlert2)
         </h2>
         
@@ -194,7 +194,7 @@
       <!-- 7. AgGrid Vue -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
+          <div class="w-2 h-6 bg-marble-600 rounded-full"></div>
           Ag-Grid (Grid.vue)
         </h2>
         

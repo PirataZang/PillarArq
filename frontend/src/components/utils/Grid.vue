@@ -232,11 +232,11 @@ const changePageSize = (event) => {
     align-items: center;
     padding: 12px 20px;
     background: #ffffff;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid #e8e5e0;
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
     font-size: 0.875rem;
-    color: #4b5563;
+    color: #5c5852;
     flex-wrap: wrap;
     gap: 12px;
 }
@@ -246,7 +246,7 @@ const changePageSize = (event) => {
 }
 
 .custom-pagination .pagination-info .highlight {
-    color: #4f46e5;
+    color: #5c5852;
     font-weight: 600;
 }
 
@@ -263,9 +263,9 @@ const changePageSize = (event) => {
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e8e5e0;
     background: #ffffff;
-    color: #374151;
+    color: #3d3a36;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -273,9 +273,9 @@ const changePageSize = (event) => {
 }
 
 .custom-pagination .pagination-controls .pag-btn:hover:not(:disabled) {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-    color: #111827;
+    background: #f3f1ed;
+    border-color: #d4d0ca;
+    color: #1f1e1c;
 }
 
 .custom-pagination .pagination-controls .pag-btn:disabled {
@@ -288,8 +288,8 @@ const changePageSize = (event) => {
 }
 
 .custom-pagination .pagination-controls .pag-btn.page-num.active {
-    background: #4f46e5;
-    border-color: #4f46e5;
+    background: #5c5852;
+    border-color: #5c5852;
     color: #ffffff;
     font-weight: 600;
 }
@@ -304,9 +304,9 @@ const changePageSize = (event) => {
 .custom-pagination .pagination-size .size-select {
     padding: 6px 12px;
     border-radius: 8px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e8e5e0;
     background-color: #ffffff;
-    color: #374151;
+    color: #3d3a36;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
@@ -315,7 +315,7 @@ const changePageSize = (event) => {
 }
 
 .custom-pagination .pagination-size .size-select:focus {
-    border-color: #4f46e5;
+    border-color: #7a746c;
 }
 
 @media (max-width: 768px) {

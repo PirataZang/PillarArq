@@ -7,9 +7,9 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="bg-white overflow-hidden shadow-sm ring-1 ring-gray-200 rounded-lg">
+  <div class="bg-white overflow-hidden shadow-sm ring-1 ring-marble-200 rounded-lg">
     <!-- Header -->
-    <div v-if="title || $slots.header || subtitle" class="px-4 py-5 sm:px-6 border-b border-gray-200 bg-white">
+    <div v-if="title || $slots.header || subtitle" class="px-4 py-5 sm:px-6 border-b border-marble-200 bg-white">
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-base font-semibold leading-6 text-gray-900">
@@ -31,7 +31,7 @@ const props = defineProps({
     </div>
 
     <!-- Footer -->
-    <div v-if="$slots.footer" class="px-4 py-4 sm:px-6 border-t border-gray-200 bg-gray-50">
+    <div v-if="$slots.footer" class="px-4 py-4 sm:px-6 border-t border-marble-200 bg-marble-50">
       <slot name="footer"></slot>
     </div>
   </div>

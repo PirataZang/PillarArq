@@ -55,12 +55,12 @@ const sizeClasses = computed(() => {
 
 const variantClasses = computed(() => {
   return {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 border border-transparent shadow-sm',
-    secondary: 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm',
+    primary: 'bg-charcoal text-white hover:bg-charcoal-light border border-marble-700/30 shadow-sm',
+    secondary: 'bg-white text-marble-800 hover:bg-marble-50 border border-marble-300 shadow-sm',
     success: 'bg-green-600 text-white hover:bg-green-700 border border-transparent shadow-sm',
     danger: 'bg-red-600 text-white hover:bg-red-700 border border-transparent shadow-sm',
     warning: 'bg-yellow-500 text-white hover:bg-yellow-600 border border-transparent shadow-sm',
-    ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 border border-transparent'
+    ghost: 'bg-transparent text-marble-700 hover:bg-marble-200/60 border border-transparent'
   }[props.variant]
 })
 

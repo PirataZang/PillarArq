@@ -5,8 +5,8 @@
     <div 
       class="flex items-center min-h-[42px] px-3 py-1.5 border-[1.5px] rounded-lg bg-white cursor-pointer transition-all duration-200 select-none gap-2"
       :class="[
-        disabled ? 'bg-gray-50 opacity-65 cursor-not-allowed pointer-events-none border-gray-200' : 'border-gray-200 hover:border-indigo-200 hover:bg-indigo-50/30',
-        isOpen ? 'border-indigo-500 shadow-[0_0_0_3px_rgba(99,102,241,0.12)] bg-white' : '',
+        disabled ? 'bg-marble-50 opacity-65 cursor-not-allowed pointer-events-none border-marble-200' : 'border-marble-200 hover:border-marble-400 hover:bg-marble-50',
+        isOpen ? 'border-marble-600 shadow-[0_0_0_3px_rgba(92,88,82,0.1)] bg-white' : '',
         search ? 'cursor-text' : ''
       ]"
       @click="handleDisplayClick" 
@@ -18,9 +18,9 @@
       <div class="flex-1 min-w-0 flex items-center">
         <template v-if="multiple">
           <div class="flex-1 flex flex-wrap gap-1.5 items-center">
-            <span v-for="opt in selectedOptions" :key="opt.value" class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md px-2 py-0.5 text-[12.5px] font-medium">
+            <span v-for="opt in selectedOptions" :key="opt.value" class="inline-flex items-center gap-1.5 bg-marble-100 text-marble-800 border border-marble-300 rounded-md px-2 py-0.5 text-[12.5px] font-medium">
               <span v-html="opt.label"></span>
-              <button type="button" class="inline-flex items-center justify-center bg-transparent border-none text-indigo-400 hover:text-indigo-700 cursor-pointer p-0 rounded-sm transition-colors" @click.stop="removeOption(opt)">
+              <button type="button" class="inline-flex items-center justify-center bg-transparent border-none text-marble-500 hover:text-marble-800 cursor-pointer p-0 rounded-sm transition-colors" @click.stop="removeOption(opt)">
                 <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
                   <path d="M1 1L8 8M8 1L1 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
                 </svg>
@@ -54,7 +54,7 @@
             <path d="M1 1L10 10M10 1L1 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
           </svg>
         </button>
-        <button v-if="link" type="button" class="inline-flex items-center justify-center w-[22px] h-[22px] rounded-md bg-transparent border-none cursor-pointer p-0 text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 transition-colors" @click.stop="navigateToLink" title="Acessar">
+        <button v-if="link" type="button" class="inline-flex items-center justify-center w-[22px] h-[22px] rounded-md bg-transparent border-none cursor-pointer p-0 text-marble-600 hover:bg-marble-100 hover:text-marble-800 transition-colors" @click.stop="navigateToLink" title="Acessar">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M8 1h3m0 0v3m0-3L5 6" stroke="currentColor"
               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -90,20 +90,20 @@
           <li v-for="opt in filteredOptions" :key="opt.value" 
             class="flex items-center gap-2 py-2.5 px-3 text-sm cursor-pointer transition-colors"
             :class="[
-              opt.disabled ? 'text-gray-400 cursor-not-allowed hover:bg-transparent' : 'text-gray-700 hover:bg-indigo-50 hover:text-indigo-700',
-              isSelected(opt) && !opt.disabled ? 'bg-indigo-50/50 text-indigo-700 font-medium' : ''
+              opt.disabled ? 'text-marble-400 cursor-not-allowed hover:bg-transparent' : 'text-marble-700 hover:bg-marble-100 hover:text-marble-900',
+              isSelected(opt) && !opt.disabled ? 'bg-marble-100 text-marble-900 font-medium' : ''
             ]" 
             @click.stop="select(opt)" role="option" :aria-selected="isSelected(opt).toString()">
             
             <span v-if="multiple" 
               class="w-4 h-4 border-[1.5px] rounded flex items-center justify-center flex-shrink-0 transition-colors text-white"
-              :class="isSelected(opt) ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'"
+              :class="isSelected(opt) ? 'bg-marble-700 border-marble-700' : 'border-marble-300'"
             >
               <svg v-if="isSelected(opt)" width="10" height="10" viewBox="0 0 10 10" fill="none">
                 <path d="M1.5 5L4 7.5L8.5 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </span>
-            <span v-else-if="isSelected(opt)" class="inline-flex items-center justify-center flex-shrink-0 text-indigo-500">
+            <span v-else-if="isSelected(opt)" class="inline-flex items-center justify-center flex-shrink-0 text-marble-700">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M2 6L5 9L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
@@ -277,7 +277,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleClickOutsi
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
+  background: #d4d0ca;
   border-radius: 4px;
 }
 </style>

@@ -42,8 +42,8 @@ const handleLogin = async () => {
 <template>
   <div class="w-full">
     <div class="sm:mx-auto sm:w-full sm:max-w-md mb-8 flex flex-col items-center">
-        <div class="mx-auto h-12 w-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-          <i class="fa-solid fa-building text-white text-2xl"></i>
+        <div class="mx-auto h-12 w-12 bg-charcoal rounded-xl flex items-center justify-center shadow-lg shadow-marble-900/10">
+          <i class="fa-solid fa-building text-marble-100 text-2xl"></i>
         </div>
       <h2 class="text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
         Acesse sua conta
@@ -53,7 +53,7 @@ const handleLogin = async () => {
       </p>
     </div>
 
-    <Card class="shadow-xl shadow-gray-200/50 border-gray-100">
+    <Card class="shadow-xl shadow-marble-900/8 border-marble-200">
       <form @submit.prevent="handleLogin" class="space-y-6">
         
         <div v-if="error" class="bg-red-50 text-red-600 p-3 rounded-md text-sm text-center border border-red-100">
@@ -80,7 +80,7 @@ const handleLogin = async () => {
           <Checkbox v-model="form.remember" label="Lembrar-me" />
           
           <div class="text-sm leading-6">
-            <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Esqueceu a senha?</a>
+            <a href="#" class="font-medium text-marble-700 hover:text-marble-900 underline-offset-2 hover:underline">Esqueceu a senha?</a>
           </div>
         </div>
 

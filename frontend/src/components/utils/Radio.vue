@@ -31,7 +31,7 @@ const handleChange = () => {
         :disabled="disabled"
         :value="value"
         @change="handleChange"
-        class="h-4 w-4 border-gray-300 text-blue-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        class="h-4 w-4 border-marble-300 text-marble-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       />
     </div>
     <div class="ml-3 text-sm leading-6">

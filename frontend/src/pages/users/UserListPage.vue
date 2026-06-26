@@ -95,7 +95,7 @@ const confirmDelete = async () => {
       </div>
     </div>
 
-    <div class="bg-white w-full rounded-xl shadow-sm border-gray-200 p-4">
+    <div class="bg-white w-full rounded-xl shadow-sm ring-1 ring-marble-200 p-4">
       <Grid :rowData="users" :columnDefs="columnDefs" :totalRows="users.length" :currentPage="1" :pageSize="50"
         @update:selection="handleSelection" />
     </div>

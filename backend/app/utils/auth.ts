@@ -12,7 +12,10 @@ export function getJwtSecret(): string {
   return env.get('APP_KEY').release()
 }
 
+import { unserializePermissions } from './permission_helper.js'
+
 export function serializeUser(user: User) {
+  const dbPermissions = user.permissions ? user.permissions.map((p) => p.permissionKey) : []
   return {
     id: user.id,
     name: user.name,
@@ -20,6 +23,7 @@ export function serializeUser(user: User) {
     role: user.role,
     is_master: user.isMaster,
     company_id: user.companyId,
+    permissions: unserializePermissions(dbPermissions),
   }
 }
 

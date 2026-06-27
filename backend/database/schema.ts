@@ -217,6 +217,21 @@ export class RefreshTokenSchema extends BaseModel {
   declare userId: bigint | number
 }
 
+export class UserPermissionSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'permissionKey', 'updatedAt', 'userId'] as const
+  $columns = UserPermissionSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare permissionKey: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare userId: bigint | number
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['companyId', 'createdAt', 'createdBy', 'deletedAt', 'email', 'id', 'isActive', 'isMaster', 'lastLoginAt', 'name', 'password', 'role', 'token', 'updatedAt', 'updatedBy'] as const
   $columns = UserSchema.$columns

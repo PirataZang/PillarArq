@@ -1,0 +1,111 @@
+{
+  "user": {
+    "title": "Usuários",
+    "icon": "fa-solid fa-users",
+    "actions": {
+      "list": {
+        "title": "Acessar",
+        "desc": "Acessar a listagem de usuários",
+        "value": false
+      },
+      "create": {
+        "title": "Cadastrar",
+        "desc": "Cadastrar novos usuários",
+        "value": false
+      },
+      "permissions": {
+        "title": "Permissões",
+        "desc": "Permissão para gerenciar permissões de usuários",
+        "value": false
+      },
+      "update": {
+        "title": "Editar",
+        "desc": "Editar usuários existentes",
+        "value": false
+      },
+      "delete": {
+        "title": "Excluir",
+        "desc": "Excluir usuários",
+        "value": false
+      }
+    }
+  },
+  "projects": {
+    "title": "Obras",
+    "icon": "fa-solid fa-building",
+    "actions": {
+      "list": {
+        "title": "Acessar",
+        "desc": "Acessar a listagem de obras",
+        "value": false
+      },
+      "create": {
+        "title": "Cadastrar",
+        "desc": "Cadastrar novas obras",
+        "value": false
+      },
+      "update": {
+        "title": "Editar",
+        "desc": "Editar obras existentes",
+        "value": false
+      },
+      "delete": {
+        "title": "Excluir",
+        "desc": "Excluir obras",
+        "value": false
+      }
+    }
+  },
+  "categories": {
+    "title": "Categorias",
+    "icon": "fa-solid fa-list",
+    "actions": {
+      "list": {
+        "title": "Acessar",
+        "desc": "Acessar a listagem de categorias",
+        "value": false
+      },
+      "create": {
+        "title": "Cadastrar",
+        "desc": "Cadastrar novas categorias",
+        "value": false
+      },
+      "update": {
+        "title": "Editar",
+        "desc": "Editar categorias existentes",
+        "value": false
+      },
+      "delete": {
+        "title": "Excluir",
+        "desc": "Excluir categorias",
+        "value": false
+      }
+    }
+  },
+  "transactions": {
+    "title": "Transações",
+    "icon": "fa-solid fa-arrow-right-arrow-left",
+    "actions": {
+      "list": {
+        "title": "Acessar",
+        "desc": "Acessar a listagem de transações",
+        "value": false
+      },
+      "create": {
+        "title": "Cadastrar",
+        "desc": "Cadastrar novas transações",
+        "value": false
+      },
+      "update": {
+        "title": "Editar",
+        "desc": "Editar transações existentes",
+        "value": false
+      },
+      "delete": {
+        "title": "Excluir",
+        "desc": "Excluir transações",
+        "value": false
+      }
+    }
+  }
+}

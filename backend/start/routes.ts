@@ -29,11 +29,13 @@ router.group(() => {
 
     router.group(() => {
       
-      router.get('/users', [UsersController, 'index'])
-      router.get('/users/:id', [UsersController, 'show'])
-      router.post('/users', [UsersController, 'store'])
-      router.put('/users/:id', [UsersController, 'update'])
-      router.delete('/users/:id', [UsersController, 'destroy'])
+      router.get('/permissions', [UsersController, 'permissionsList'])
+
+      router.get('/users', [UsersController, 'index']).use(middleware.permission(['user.list']))
+      router.get('/users/:id', [UsersController, 'show']).use(middleware.permission(['user.list']))
+      router.post('/users', [UsersController, 'store']).use(middleware.permission(['user.create']))
+      router.put('/users/:id', [UsersController, 'update']).use(middleware.permission(['user.update']))
+      router.delete('/users/:id', [UsersController, 'destroy']).use(middleware.permission(['user.delete']))
 
       router.get('/clients', [ClientsController, 'index'])
       router.get('/clients/:id', [ClientsController, 'show'])

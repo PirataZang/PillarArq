@@ -30,26 +30,48 @@ const isMaster = computed(() => !!authStore.user?.is_master)
 
 const navigation = ref([
   { id: 'dashboard', name: 'Dashboard', href: '/dashboard', icon: 'fa-solid fa-chart-pie' },
-  { id: 'projects', name: 'Obras', href: '/projects', icon: 'fa-solid fa-building' },
+  { id: 'projects', name: 'Obras', href: '/projects', icon: 'fa-solid fa-building', permission: 'projects.list' },
   { id: 'clients', name: 'Clientes', href: '/clients', icon: 'fa-solid fa-user-tie' },
-  { id: 'users', name: 'Usuários', href: '/users', icon: 'fa-solid fa-users' },
+  { id: 'users', name: 'Usuários', href: '/users', icon: 'fa-solid fa-users', permission: 'user.list' },
   {
     id: 'finance', name: 'Financeiro', icon: 'fa-solid fa-dollar-sign',
     children: [
-      { id: 'transactions', name: 'Transações', href: '/finance/transactions', icon: 'fa-solid fa-arrow-right-arrow-left' },
-      { id: 'categories', name: 'Categorias', href: '/finance/categories', icon: 'fa-solid fa-list' }
+      { id: 'transactions', name: 'Transações', href: '/finance/transactions', icon: 'fa-solid fa-arrow-right-arrow-left', permission: 'transactions.list' },
+      { id: 'categories', name: 'Categorias', href: '/finance/categories', icon: 'fa-solid fa-list', permission: 'categories.list' }
     ]
   },
-  {
-    id: 'master',
-    name: 'Master',
-    icon: 'fa-solid fa-user-tie',
-    requiresMaster: true,
-    children: [
-      { id: 'companies', name: 'Empresas', href: '/companies', icon: 'fa-solid fa-city', requiresMaster: true },
-    ]
-  }
+  { id: 'companies', name: 'Empresas', href: '/companies', icon: 'fa-solid fa-city', requiresMaster: true },
 ])
+
+// Filtra a navegação dinamicamente de acordo com as permissões do usuário
+const filteredNavigation = computed(() => {
+  return navigation.value
+    .map(item => {
+      if (item.children) {
+        const visibleChildren = item.children.filter(child => {
+          if (child.permission) {
+            return authStore.hasPermission(child.permission)
+          }
+          return true
+        })
+        return { ...item, children: visibleChildren }
+      }
+      return item
+    })
+    .filter(item => {
+      if (item.requiresMaster) {
+        return isMaster.value
+      }
+      if (item.permission) {
+        return authStore.hasPermission(item.permission)
+      }
+      if (item.children) {
+        // Mostra a categoria pai apenas se possuir pelo menos um filho visível
+        return item.children.length > 0
+      }
+      return true
+    })
+})
 
 const isActive = (href) => {
   if (href === '/') return route.path === '/'
@@ -72,7 +94,7 @@ onMounted(async () => {
       const { data } = await api.get('/companies')
       if (data && data.success) {
         companiesList.value = data.data
-
+        
         // Se o selectedCompanyId não estiver na lista (por exemplo, se foi excluído), redefine
         const exists = companiesList.value.some(c => c.id === selectedCompanyId.value)
         if (!exists && companiesList.value.length > 0) {
@@ -128,97 +150,89 @@ const onCompanyChange = (event) => {
 
       <!-- Navigation -->
       <nav class="flex-1 py-2 space-y-2 overflow-y-auto overflow-x-hidden custom-scrollbar px-0">
-        <template v-for="item in navigation" :key="item.id">
-          <template v-if="!item.requiresMaster || isMaster">
+        <template v-for="item in filteredNavigation" :key="item.id">
 
-            <!-- Single Item -->
-            <router-link v-if="!item.children" :to="item.href" :class="[
-              isActive(item.href)
-                ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
-                : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
-              'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
-            ]" @click="handleLinkClick">
+          <!-- Single Item -->
+          <router-link v-if="!item.children" :to="item.href" :class="[
+            isActive(item.href)
+              ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
+              : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
+            'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
+          ]" @click="handleLinkClick">
+            <span class="w-8 h-8 flex items-center justify-center shrink-0">
+              <i :class="[isActive(item.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
+            </span>
+            <span :class="[
+              open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
+              'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
+            ]">{{ item.name }}</span>
+
+            <!-- Tooltip -->
+            <div v-if="!open" class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+              {{ item.name }}
+            </div>
+          </router-link>
+
+          <!-- Accordion Item -->
+          <div v-else class="space-y-1 flex flex-col">
+            <button @click="handleAccordionClick(item.id)" :class="[
+              'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4',
+              openMenus.includes(item.id) && open ? 'text-white' : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
+            ]">
               <span class="w-8 h-8 flex items-center justify-center shrink-0">
-                <i
-                  :class="[isActive(item.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
+                <i :class="[openMenus.includes(item.id) && open ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
               </span>
               <span :class="[
                 open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
-                'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
+                'transition-all duration-300 ease-in-out whitespace-nowrap truncate flex-1 text-left'
               ]">{{ item.name }}</span>
+              <i :class="[
+                'fa-solid fa-chevron-down fa-fw text-xs text-gray-500 transition-all duration-300 ml-2 shrink-0',
+                open ? 'opacity-100 scale-100' : 'opacity-0 scale-0 w-0 overflow-hidden',
+                openMenus.includes(item.id) ? 'rotate-180' : ''
+              ]"></i>
 
               <!-- Tooltip -->
-              <div v-if="!open"
-                class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+              <div v-if="!open" class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
                 {{ item.name }}
               </div>
-            </router-link>
+            </button>
 
-            <!-- Accordion Item -->
-            <div v-else class="space-y-1 flex flex-col">
-              <button @click="handleAccordionClick(item.id)" :class="[
-                'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4',
-                openMenus.includes(item.id) && open ? 'text-white' : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
-              ]">
+            <!-- Submenu Items -->
+            <div v-show="openMenus.includes(item.id) && open" class="space-y-1 mt-1 mb-2 transition-all duration-300 ease-in-out" :class="open ? 'pl-4' : 'pl-0'">
+              <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href" :title="!open ? subItem.name : ''" :class="[
+                isActive(subItem.href)
+                  ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
+                  : 'text-marble-400 hover:bg-charcoal-light/80 hover:text-white',
+                'group flex items-center h-10 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
+              ]" @click="handleLinkClick">
                 <span class="w-8 h-8 flex items-center justify-center shrink-0">
-                  <i
-                    :class="[openMenus.includes(item.id) && open ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
+                  <i :class="[isActive(subItem.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', subItem.icon, 'fa-fw text-base text-center transition-colors']"></i>
                 </span>
                 <span :class="[
                   open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
-                  'transition-all duration-300 ease-in-out whitespace-nowrap truncate flex-1 text-left'
-                ]">{{ item.name }}</span>
-                <i :class="[
-                  'fa-solid fa-chevron-down fa-fw text-xs text-gray-500 transition-all duration-300 ml-2 shrink-0',
-                  open ? 'opacity-100 scale-100' : 'opacity-0 scale-0 w-0 overflow-hidden',
-                  openMenus.includes(item.id) ? 'rotate-180' : ''
-                ]"></i>
-
-                <!-- Tooltip -->
-                <div v-if="!open"
-                  class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
-                  {{ item.name }}
-                </div>
-              </button>
-
-              <!-- Submenu Items -->
-              <div v-show="openMenus.includes(item.id) && open"
-                class="space-y-1 mt-1 mb-2 transition-all duration-300 ease-in-out" :class="open ? 'pl-4' : 'pl-0'">
-                <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href"
-                  :title="!open ? subItem.name : ''" :class="[
-                    isActive(subItem.href)
-                      ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
-                      : 'text-marble-400 hover:bg-charcoal-light/80 hover:text-white',
-                    'group flex items-center h-10 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
-                  ]" @click="handleLinkClick">
-                  <span class="w-8 h-8 flex items-center justify-center shrink-0">
-                    <i
-                      :class="[isActive(subItem.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', subItem.icon, 'fa-fw text-base text-center transition-colors']"></i>
-                  </span>
-                  <span :class="[
-                    open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
-                    'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
-                  ]">{{ subItem.name }}</span>
-                </router-link>
-              </div>
+                  'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
+                ]">{{ subItem.name }}</span>
+              </router-link>
             </div>
+          </div>
 
-          </template>
         </template>
       </nav>
 
       <!-- Footer / Company Select -->
       <div v-if="isMaster" class="p-4 border-t border-charcoal-border shrink-0 flex justify-center">
-        <div
-          class="group relative flex items-center bg-charcoal-light rounded-xl p-1 border border-charcoal-border overflow-hidden transition-all duration-300 w-full"
-          :class="open ? 'max-w-full' : 'max-w-12 justify-center border-charcoal-border'">
+        <div class="group relative flex items-center bg-charcoal-light rounded-xl p-1 border border-charcoal-border overflow-hidden transition-all duration-300 w-full"
+             :class="open ? 'max-w-full' : 'max-w-12 justify-center border-charcoal-border'">
           <div class="w-10 h-10 rounded-lg bg-charcoal-muted flex items-center justify-center shrink-0">
             <i class="fa-solid fa-building text-marble-400 text-sm"></i>
           </div>
           <div :class="[
             open ? 'opacity-100 max-w-xs ml-2 flex items-center flex-1' : 'opacity-0 max-w-0 overflow-hidden pointer-events-none'
           ]" class="transition-all duration-300 ease-in-out flex items-center w-full">
-            <select :value="selectedCompanyId" @change="onCompanyChange"
+            <select
+              :value="selectedCompanyId"
+              @change="onCompanyChange"
               class="w-full bg-transparent border-none text-marble-300 text-sm font-medium py-2 pl-1 pr-6 focus:outline-none focus:ring-0 appearance-none cursor-pointer">
               <option v-for="company in companiesList" :key="company.id" :value="company.id" class="bg-charcoal-light">
                 {{ company.name }}
@@ -230,8 +244,7 @@ const onCompanyChange = (event) => {
           </div>
 
           <!-- Tooltip -->
-          <div v-if="!open"
-            class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+          <div v-if="!open" class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
             Empresas
           </div>
         </div>

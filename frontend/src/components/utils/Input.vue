@@ -12,7 +12,8 @@ const props = defineProps({
   helperText: { type: String, default: '' },
   type: { type: String, default: 'text' },
   maxlength: { type: [Number, String], default: null },
-  minlength: { type: [Number, String], default: null }
+  minlength: { type: [Number, String], default: null },
+  autocomplete: { type: String, default: null }
 })
 
 const emit = defineEmits(['update:modelValue', 'blur', 'focus', 'change'])
@@ -39,6 +40,7 @@ const hasError = computed(() => !!props.error)
         :readonly="readonly"
         :maxlength="maxlength"
         :minlength="minlength"
+        :autocomplete="autocomplete"
         :aria-invalid="hasError"
         :aria-describedby="hasError ? `${id}-error` : helperText ? `${id}-helper` : null"
         @input="$emit('update:modelValue', $event.target.value)"

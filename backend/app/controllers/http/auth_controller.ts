@@ -81,6 +81,7 @@ export default class AuthController {
 
   async me({ auth, response }: HttpContext) {
     const user = auth.user as User
+    await user.load('permissions')
 
     return response.ok({
       success: true,

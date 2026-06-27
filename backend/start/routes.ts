@@ -13,13 +13,13 @@ const ProjectNotesController = () => import('#controllers/http/project_notes_con
 
 router.group(() => {
 
+  // Rotas públicas de autenticação
   router.group(() => {
     router.post('/login', [AuthController, 'login'])
     router.post('/refresh', [AuthController, 'refresh'])
   }).prefix('/auth')
 
-  router.post('/companies', [CompaniesController, 'store'])
-
+  // Rotas autenticadas genéricas (fora do contexto de um tenant específico)
   router.group(() => {
     
     router.group(() => {
@@ -27,13 +27,25 @@ router.group(() => {
       router.get('/me', [AuthController, 'me'])
     }).prefix('/auth')
 
+    // Gerenciamento de empresas (apenas para master)
+    router.group(() => {
+      router.get('/companies', [CompaniesController, 'index'])
+      router.get('/companies/:id', [CompaniesController, 'show'])
+      router.post('/companies', [CompaniesController, 'store'])
+      router.put('/companies/:id', [CompaniesController, 'update'])
+      router.delete('/companies/:id', [CompaniesController, 'destroy'])
+    }).use(middleware.master())
+
+    // Rotas de recursos associados a um tenant específico
     router.group(() => {
       
-      router.get('/users', [UsersController, 'index'])
-      router.get('/users/:id', [UsersController, 'show'])
-      router.post('/users', [UsersController, 'store'])
-      router.put('/users/:id', [UsersController, 'update'])
-      router.delete('/users/:id', [UsersController, 'destroy'])
+      router.get('/permissions', [UsersController, 'permissionsList'])
+
+      router.get('/users', [UsersController, 'index']).use(middleware.permission(['user.list']))
+      router.get('/users/:id', [UsersController, 'show']).use(middleware.permission(['user.list']))
+      router.post('/users', [UsersController, 'store']).use(middleware.permission(['user.create']))
+      router.put('/users/:id', [UsersController, 'update']).use(middleware.permission(['user.update']))
+      router.delete('/users/:id', [UsersController, 'destroy']).use(middleware.permission(['user.delete']))
 
       router.get('/clients', [ClientsController, 'index'])
       router.get('/clients/:id', [ClientsController, 'show'])

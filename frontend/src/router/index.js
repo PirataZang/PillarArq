@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
+import { useSwal } from '@/utils/swal'
 
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
@@ -14,6 +15,8 @@ import ProjectListPage from '@/pages/projects/ProjectListPage.vue'
 import ProjectFormPage from '@/pages/projects/ProjectFormPage.vue'
 import ProjectDetailPage from '@/pages/projects/ProjectDetailPage.vue'
 import ComponentsTestPage from '@/pages/ComponentsTest.vue'
+import CompanyListPage from '@/pages/companies/CompanyListPage.vue'
+import CompanyFormPage from '@/pages/companies/CompanyFormPage.vue'
 
 const routes = [
   {
@@ -46,16 +49,19 @@ const routes = [
         path: 'users',
         name: 'users.list',
         component: UserListPage,
+        meta: { permission: 'user.list', title: 'Usuários' },
       },
       {
         path: 'users/create',
         name: 'users.create',
         component: UserFormPage,
+        meta: { permission: 'user.create', title: 'Usuários' },
       },
       {
         path: 'users/:id',
         name: 'users.edit',
         component: UserFormPage,
+        meta: { permission: 'user.update', title: 'Usuários' },
       },
       {
         path: 'clients',
@@ -76,26 +82,48 @@ const routes = [
         path: 'projects',
         name: 'projects.list',
         component: ProjectListPage,
+        meta: { permission: 'projects.list', title: 'Obras' },
       },
       {
         path: 'projects/create',
         name: 'projects.create',
         component: ProjectFormPage,
+        meta: { permission: 'projects.create', title: 'Obras' },
       },
       {
         path: 'projects/:id/edit',
         name: 'projects.edit',
         component: ProjectFormPage,
+        meta: { permission: 'projects.update', title: 'Obras' },
       },
       {
         path: 'projects/:id',
         name: 'projects.detail',
         component: ProjectDetailPage,
+        meta: { permission: 'projects.list', title: 'Obras' },
       },
       {
         path: 'components-test',
         name: 'components.test',
         component: ComponentsTestPage,
+      },
+      {
+        path: 'companies',
+        name: 'companies.list',
+        component: CompanyListPage,
+        meta: { requiresMaster: true, title: 'Empresas' },
+      },
+      {
+        path: 'companies/create',
+        name: 'companies.create',
+        component: CompanyFormPage,
+        meta: { requiresMaster: true, title: 'Empresas' },
+      },
+      {
+        path: 'companies/:id',
+        name: 'companies.edit',
+        component: CompanyFormPage,
+        meta: { requiresMaster: true, title: 'Empresas' },
       },
     ],
   },
@@ -122,6 +150,18 @@ router.beforeEach(async (to) => {
     const valid = await authStore.validateSession()
     if (!valid) {
       return { name: 'login' }
+    }
+
+    if (to.meta.requiresMaster && !authStore.user?.is_master) {
+      const swal = useSwal()
+      swal.error('Acesso Negado', `Você não tem acesso à tela de ${to.meta.title || 'Empresas'}`)
+      return { name: 'dashboard' }
+    }
+
+    if (to.meta.permission && !authStore.hasPermission(to.meta.permission)) {
+      const swal = useSwal()
+      swal.error('Acesso Negado', `Você não tem acesso à tela de ${to.meta.title || 'esta página'}`)
+      return { name: 'dashboard' }
     }
   }
 

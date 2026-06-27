@@ -15,6 +15,7 @@ export default class AuthService {
       .where('email', email)
       .where('isActive', true)
       .whereNull('deletedAt')
+      .preload('permissions')
       .first()
 
     if (!user) {
@@ -51,7 +52,11 @@ export default class AuthService {
       return null
     }
 
-    const user = await User.find(refreshToken.userId)
+    const user = await User.query()
+      .where('id', refreshToken.userId.toString())
+      .preload('permissions')
+      .first()
+
     if (!user || !user.isActive || user.deletedAt) {
       return null
     }

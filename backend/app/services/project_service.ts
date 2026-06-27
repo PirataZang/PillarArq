@@ -1,6 +1,8 @@
 import Project from '#models/project'
 import ProjectPhase from '#models/project_phase'
 import Client from '#models/client'
+import Company from '#models/company'
+import LimitException from '#exceptions/limit_exception'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
 import type { createProjectValidator, updateProjectValidator } from '#validators/project_validator'
@@ -80,6 +82,25 @@ export default class ProjectService {
       .whereNull('deletedAt')
       .firstOrFail()
 
+    const status = payload.status || DEFAULT_PROJECT_STATUS
+    if (status !== 'ARCHIVED') {
+      const company = await Company.query().where('id', companyId).whereNull('deletedAt').firstOrFail()
+
+      const currentActiveCount = await Project.query()
+        .where('companyId', companyId)
+        .whereNull('deletedAt')
+        .whereNot('status', 'ARCHIVED')
+        .count('* as total')
+        .first()
+
+      const activeTotal = Number(currentActiveCount?.$extras.total || 0)
+      if (activeTotal >= company.maxProjects) {
+        throw new LimitException(
+          `Você atingiu o limite de obras ativas para sua empresa (máximo ${company.maxProjects}). Se desejar aumentar o limite, por favor entre em contato com o suporte.`
+        )
+      }
+    }
+
     const project = await Project.create({
       companyId,
       clientId: payload.client_id,
@@ -119,6 +140,24 @@ export default class ProjectService {
         .where('companyId', companyId)
         .whereNull('deletedAt')
         .firstOrFail()
+    }
+
+    if (project.status === 'ARCHIVED' && payload.status && payload.status !== 'ARCHIVED') {
+      const company = await Company.query().where('id', companyId).whereNull('deletedAt').firstOrFail()
+
+      const currentActiveCount = await Project.query()
+        .where('companyId', companyId)
+        .whereNull('deletedAt')
+        .whereNot('status', 'ARCHIVED')
+        .count('* as total')
+        .first()
+
+      const activeTotal = Number(currentActiveCount?.$extras.total || 0)
+      if (activeTotal >= company.maxProjects) {
+        throw new LimitException(
+          `Você atingiu o limite de obras ativas para sua empresa (máximo ${company.maxProjects}). Se desejar aumentar o limite, por favor entre em contato com o suporte.`
+        )
+      }
     }
 
     const {

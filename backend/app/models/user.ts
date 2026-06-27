@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
-import { BaseModel, column, belongsTo, beforeSave } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, belongsTo, hasMany, beforeSave } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Company from './company.js'
+import UserPermission from './user_permission.js'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -53,9 +54,12 @@ export default class User extends BaseModel {
   @belongsTo(() => Company)
   declare company: BelongsTo<typeof Company>
 
+  @hasMany(() => UserPermission, { foreignKey: 'userId' })
+  declare permissions: HasMany<typeof UserPermission>
+
   // Colunas para ocultar na serialização (como no Laravel)
   static get hidden() {
-    return ['password', 'is_master', 'token']
+    return ['password', 'isMaster', 'token']
   }
 
   serialize(cherryPick?: any) {

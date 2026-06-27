@@ -23,6 +23,12 @@ api.interceptors.request.use(
     if (config.loading !== false) {
       useLoadingStore().show()
     }
+
+    const selectedCompanyId = localStorage.getItem('selected_company_id')
+    if (selectedCompanyId && selectedCompanyId !== 'all') {
+      config.headers['X-Company-Id'] = selectedCompanyId
+    }
+
     return config
   },
   (error) => {

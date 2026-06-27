@@ -62,6 +62,14 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const hasPermission = (permission) => {
+    if (!user.value) return false
+    if (user.value.is_master) return true
+
+    const [module, action] = permission.split('.')
+    return user.value.permissions?.[module]?.actions?.[action]?.value === true
+  }
+
   return {
     user,
     isAuthenticated,
@@ -71,5 +79,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     validateSession,
+    hasPermission,
   }
 })

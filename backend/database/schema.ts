@@ -43,7 +43,7 @@ export class ClientSchema extends BaseModel {
 }
 
 export class CompanySchema extends BaseModel {
-  static $columns = ['createdAt', 'deletedAt', 'id', 'isActive', 'name', 'slug', 'updatedAt'] as const
+  static $columns = ['createdAt', 'deletedAt', 'id', 'isActive', 'maxProjects', 'maxUsers', 'name', 'slug', 'updatedAt'] as const
   $columns = CompanySchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -53,6 +53,10 @@ export class CompanySchema extends BaseModel {
   declare id: bigint | number
   @column()
   declare isActive: boolean
+  @column()
+  declare maxProjects: number
+  @column()
+  declare maxUsers: number
   @column()
   declare name: string
   @column()
@@ -211,6 +215,21 @@ export class RefreshTokenSchema extends BaseModel {
   declare isRevoked: boolean
   @column()
   declare token: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare userId: bigint | number
+}
+
+export class UserPermissionSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'permissionKey', 'updatedAt', 'userId'] as const
+  $columns = UserPermissionSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare permissionKey: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
   @column()

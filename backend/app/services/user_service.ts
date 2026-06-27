@@ -1,4 +1,6 @@
 import User from '#models/user'
+import Company from '#models/company'
+import LimitException from '#exceptions/limit_exception'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
 import type { createUserValidator, updateUserValidator } from '#validators/user_validator'
@@ -33,6 +35,21 @@ export default class UserService {
    * Cria um novo usuário garantindo o isolamento do tenant.
    */
   async store(companyId: string, payload: CreateUserPayload) {
+    const company = await Company.query().where('id', companyId).whereNull('deletedAt').firstOrFail()
+
+    const currentUsersCount = await User.query()
+      .where('companyId', companyId)
+      .whereNull('deletedAt')
+      .count('* as total')
+      .first()
+
+    const total = Number(currentUsersCount?.$extras.total || 0)
+    if (total >= company.maxUsers) {
+      throw new LimitException(
+        `Você atingiu o limite de usuários cadastrados para sua empresa (máximo ${company.maxUsers}). Se desejar aumentar o limite, por favor entre em contato com o suporte.`
+      )
+    }
+
     const { permissions, ...userData } = payload
     const user = await User.create({
       ...userData,

@@ -116,7 +116,7 @@ const handleSave = async () => {
     let errorMsg = 'Ocorreu um erro ao salvar as informações.'
     if (err.response?.data) {
       const data = err.response.data
-      if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+      if (data.errors && Array.isArray(data.errors) && data.errors.length > 0 && typeof data.errors[0] === 'object') {
         errorMsg = data.errors.map((e) => e.message).join('\n')
       } else {
         errorMsg = data.message || errorMsg

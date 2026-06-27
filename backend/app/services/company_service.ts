@@ -19,7 +19,9 @@ export default class CompanyService {
     return Company.create({
       name: payload.name,
       slug: payload.slug,
-      isActive: payload.is_active !== undefined ? !!payload.is_active : true
+      isActive: payload.is_active !== undefined ? !!payload.is_active : true,
+      maxUsers: payload.max_users !== undefined ? payload.max_users : 5,
+      maxProjects: payload.max_projects !== undefined ? payload.max_projects : 5
     })
   }
 
@@ -34,6 +36,12 @@ export default class CompanyService {
     }
     if (payload.is_active !== undefined) {
       company.isActive = !!payload.is_active
+    }
+    if (payload.max_users !== undefined) {
+      company.maxUsers = payload.max_users
+    }
+    if (payload.max_projects !== undefined) {
+      company.maxProjects = payload.max_projects
     }
     
     await company.save()

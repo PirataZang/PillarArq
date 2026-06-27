@@ -13,6 +13,8 @@ const columnDefs = [
   { field: 'id', headerName: 'ID', width: 90, filter: 'agNumberColumnFilter' },
   { field: 'name', headerName: 'Nome', flex: 1, filter: 'agTextColumnFilter' },
   { field: 'slug', headerName: 'Slug/Identificador', flex: 1, filter: 'agTextColumnFilter' },
+  { field: 'maxUsers', headerName: 'Limite Usuários', width: 150, filter: 'agNumberColumnFilter' },
+  { field: 'maxProjects', headerName: 'Limite Obras Ativas', width: 170, filter: 'agNumberColumnFilter' },
   { field: 'isActive', headerName: 'Ativo', width: 120, valueFormatter: (params) => params.value ? 'Sim' : 'Não', filter: 'agTextColumnFilter', filterValueGetter: (params) => (params.data?.isActive ? 'Sim' : 'Não') },
   { field: 'createdAt', headerName: 'Cadastrado em', type: 'date', width: 180 }
 ]

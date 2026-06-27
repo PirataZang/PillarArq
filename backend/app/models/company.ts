@@ -16,6 +16,12 @@ export default class Company extends BaseModel {
   @column()
   declare isActive: boolean
 
+  @column({ serializeAs: 'maxUsers' })
+  declare maxUsers: number
+
+  @column({ serializeAs: 'maxProjects' })
+  declare maxProjects: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

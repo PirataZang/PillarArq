@@ -17,7 +17,9 @@ const isEdit = computed(() => !!route.params.id)
 const form = reactive({
   name: '',
   slug: '',
-  isActive: true
+  isActive: true,
+  maxUsers: 5,
+  maxProjects: 5
 })
 
 const loading = ref(false)
@@ -32,6 +34,8 @@ onMounted(async () => {
         form.name = data.data.name
         form.slug = data.data.slug
         form.isActive = !!data.data.isActive
+        form.maxUsers = data.data.maxUsers !== undefined ? data.data.maxUsers : 5
+        form.maxProjects = data.data.maxProjects !== undefined ? data.data.maxProjects : 5
       }
     } catch (err) {
       console.error('Erro ao carregar empresa:', err)
@@ -58,7 +62,9 @@ const handleSave = async () => {
     const payload = {
       name: form.name,
       slug: form.slug,
-      is_active: form.isActive
+      is_active: form.isActive,
+      max_users: Number(form.maxUsers),
+      max_projects: Number(form.maxProjects)
     }
 
     if (isEdit.value) {
@@ -123,6 +129,33 @@ const cancel = () => {
             description="Se desativada, os usuários desta empresa não conseguirão acessar o sistema."
             :disabled="loading"
           />
+        </div>
+
+        <div class="pt-6 border-t border-marble-200">
+          <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-charcoal"></i>
+            Configurações de Limites
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              v-model="form.maxUsers"
+              label="Limite de Usuários"
+              type="number"
+              min="1"
+              placeholder="Ex: 5"
+              required
+              :disabled="loading"
+            />
+            <Input
+              v-model="form.maxProjects"
+              label="Limite de Obras Ativas"
+              type="number"
+              min="1"
+              placeholder="Ex: 5"
+              required
+              :disabled="loading"
+            />
+          </div>
         </div>
 
         <div class="flex justify-end gap-3 pt-6 border-t border-marble-200">

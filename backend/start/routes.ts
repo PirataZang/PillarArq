@@ -13,13 +13,13 @@ const ProjectNotesController = () => import('#controllers/http/project_notes_con
 
 router.group(() => {
 
+  // Rotas públicas de autenticação
   router.group(() => {
     router.post('/login', [AuthController, 'login'])
     router.post('/refresh', [AuthController, 'refresh'])
   }).prefix('/auth')
 
-  router.post('/companies', [CompaniesController, 'store'])
-
+  // Rotas autenticadas genéricas (fora do contexto de um tenant específico)
   router.group(() => {
     
     router.group(() => {
@@ -27,6 +27,16 @@ router.group(() => {
       router.get('/me', [AuthController, 'me'])
     }).prefix('/auth')
 
+    // Gerenciamento de empresas (apenas para master)
+    router.group(() => {
+      router.get('/companies', [CompaniesController, 'index'])
+      router.get('/companies/:id', [CompaniesController, 'show'])
+      router.post('/companies', [CompaniesController, 'store'])
+      router.put('/companies/:id', [CompaniesController, 'update'])
+      router.delete('/companies/:id', [CompaniesController, 'destroy'])
+    }).use(middleware.master())
+
+    // Rotas de recursos associados a um tenant específico
     router.group(() => {
       
       router.get('/permissions', [UsersController, 'permissionsList'])

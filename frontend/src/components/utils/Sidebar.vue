@@ -1,6 +1,8 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
+import api from '@/services/api'
 
 const props = defineProps({
   open: {
@@ -11,6 +13,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'toggle', 'open'])
 const route = useRoute()
+const authStore = useAuthStore()
 
 // Controle dos submenus abertos
 const openMenus = ref(['finance'])
@@ -22,6 +25,8 @@ const handleAccordionClick = (menuId) => {
     openMenus.value.push(menuId)
   }
 }
+
+const isMaster = computed(() => !!authStore.user?.is_master)
 
 const navigation = ref([
   { id: 'dashboard', name: 'Dashboard', href: '/dashboard', icon: 'fa-solid fa-chart-pie' },
@@ -35,6 +40,15 @@ const navigation = ref([
       { id: 'categories', name: 'Categorias', href: '/finance/categories', icon: 'fa-solid fa-list' }
     ]
   },
+  {
+    id: 'master',
+    name: 'Master',
+    icon: 'fa-solid fa-user-tie',
+    requiresMaster: true,
+    children: [
+      { id: 'companies', name: 'Empresas', href: '/companies', icon: 'fa-solid fa-city', requiresMaster: true },
+    ]
+  }
 ])
 
 const isActive = (href) => {
@@ -46,6 +60,37 @@ const handleLinkClick = () => {
   if (typeof window !== 'undefined' && window.innerWidth < 1024) {
     emit('close')
   }
+}
+
+// Lógica de Tenant Multi-Empresa para Masters
+const companiesList = ref([])
+const selectedCompanyId = ref(localStorage.getItem('selected_company_id') || authStore.user?.company_id)
+
+onMounted(async () => {
+  if (isMaster.value) {
+    try {
+      const { data } = await api.get('/companies')
+      if (data && data.success) {
+        companiesList.value = data.data
+
+        // Se o selectedCompanyId não estiver na lista (por exemplo, se foi excluído), redefine
+        const exists = companiesList.value.some(c => c.id === selectedCompanyId.value)
+        if (!exists && companiesList.value.length > 0) {
+          selectedCompanyId.value = companiesList.value[0].id
+          localStorage.setItem('selected_company_id', selectedCompanyId.value)
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao buscar empresas para o seletor:', err)
+    }
+  }
+})
+
+const onCompanyChange = (event) => {
+  const val = event.target.value
+  localStorage.setItem('selected_company_id', val)
+  selectedCompanyId.value = val
+  window.location.reload()
 }
 </script>
 
@@ -84,91 +129,100 @@ const handleLinkClick = () => {
       <!-- Navigation -->
       <nav class="flex-1 py-2 space-y-2 overflow-y-auto overflow-x-hidden custom-scrollbar px-0">
         <template v-for="item in navigation" :key="item.id">
+          <template v-if="!item.requiresMaster || isMaster">
 
-          <!-- Single Item -->
-          <router-link v-if="!item.children" :to="item.href" :class="[
-            isActive(item.href)
-              ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
-              : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
-            'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
-          ]" @click="handleLinkClick">
-            <span class="w-8 h-8 flex items-center justify-center shrink-0">
-              <i :class="[isActive(item.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
-            </span>
-            <span :class="[
-              open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
-              'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
-            ]">{{ item.name }}</span>
-
-            <!-- Tooltip -->
-            <div v-if="!open" class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
-              {{ item.name }}
-            </div>
-          </router-link>
-
-          <!-- Accordion Item -->
-          <div v-else class="space-y-1 flex flex-col">
-            <button @click="handleAccordionClick(item.id)" :class="[
-              'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4',
-              openMenus.includes(item.id) && open ? 'text-white' : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
-            ]">
+            <!-- Single Item -->
+            <router-link v-if="!item.children" :to="item.href" :class="[
+              isActive(item.href)
+                ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
+                : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
+              'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
+            ]" @click="handleLinkClick">
               <span class="w-8 h-8 flex items-center justify-center shrink-0">
-                <i :class="[openMenus.includes(item.id) && open ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
+                <i
+                  :class="[isActive(item.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
               </span>
               <span :class="[
                 open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
-                'transition-all duration-300 ease-in-out whitespace-nowrap truncate flex-1 text-left'
+                'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
               ]">{{ item.name }}</span>
-              <i :class="[
-                'fa-solid fa-chevron-down fa-fw text-xs text-gray-500 transition-all duration-300 ml-2 shrink-0',
-                open ? 'opacity-100 scale-100' : 'opacity-0 scale-0 w-0 overflow-hidden',
-                openMenus.includes(item.id) ? 'rotate-180' : ''
-              ]"></i>
 
               <!-- Tooltip -->
-              <div v-if="!open" class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+              <div v-if="!open"
+                class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
                 {{ item.name }}
               </div>
-            </button>
+            </router-link>
 
-            <!-- Submenu Items -->
-            <div v-show="openMenus.includes(item.id) && open" class="space-y-1 mt-1 mb-2 transition-all duration-300 ease-in-out" :class="open ? 'pl-4' : 'pl-0'">
-              <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href" :title="!open ? subItem.name : ''" :class="[
-                isActive(subItem.href)
-                  ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
-                  : 'text-marble-400 hover:bg-charcoal-light/80 hover:text-white',
-                'group flex items-center h-10 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
-              ]" @click="handleLinkClick">
+            <!-- Accordion Item -->
+            <div v-else class="space-y-1 flex flex-col">
+              <button @click="handleAccordionClick(item.id)" :class="[
+                'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4',
+                openMenus.includes(item.id) && open ? 'text-white' : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
+              ]">
                 <span class="w-8 h-8 flex items-center justify-center shrink-0">
-                  <i :class="[isActive(subItem.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', subItem.icon, 'fa-fw text-base text-center transition-colors']"></i>
+                  <i
+                    :class="[openMenus.includes(item.id) && open ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
                 </span>
                 <span :class="[
                   open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
-                  'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
-                ]">{{ subItem.name }}</span>
-              </router-link>
-            </div>
-          </div>
+                  'transition-all duration-300 ease-in-out whitespace-nowrap truncate flex-1 text-left'
+                ]">{{ item.name }}</span>
+                <i :class="[
+                  'fa-solid fa-chevron-down fa-fw text-xs text-gray-500 transition-all duration-300 ml-2 shrink-0',
+                  open ? 'opacity-100 scale-100' : 'opacity-0 scale-0 w-0 overflow-hidden',
+                  openMenus.includes(item.id) ? 'rotate-180' : ''
+                ]"></i>
 
+                <!-- Tooltip -->
+                <div v-if="!open"
+                  class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+                  {{ item.name }}
+                </div>
+              </button>
+
+              <!-- Submenu Items -->
+              <div v-show="openMenus.includes(item.id) && open"
+                class="space-y-1 mt-1 mb-2 transition-all duration-300 ease-in-out" :class="open ? 'pl-4' : 'pl-0'">
+                <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href"
+                  :title="!open ? subItem.name : ''" :class="[
+                    isActive(subItem.href)
+                      ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
+                      : 'text-marble-400 hover:bg-charcoal-light/80 hover:text-white',
+                    'group flex items-center h-10 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
+                  ]" @click="handleLinkClick">
+                  <span class="w-8 h-8 flex items-center justify-center shrink-0">
+                    <i
+                      :class="[isActive(subItem.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', subItem.icon, 'fa-fw text-base text-center transition-colors']"></i>
+                  </span>
+                  <span :class="[
+                    open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
+                    'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
+                  ]">{{ subItem.name }}</span>
+                </router-link>
+              </div>
+            </div>
+
+          </template>
         </template>
       </nav>
 
       <!-- Footer / Company Select -->
-      <div class="p-4 border-t border-charcoal-border shrink-0 flex justify-center">
-        <div class="group relative flex items-center bg-charcoal-light rounded-xl p-1 border border-charcoal-border overflow-hidden transition-all duration-300 w-full"
-             :class="open ? 'max-w-full' : 'max-w-12 justify-center border-charcoal-border'">
+      <div v-if="isMaster" class="p-4 border-t border-charcoal-border shrink-0 flex justify-center">
+        <div
+          class="group relative flex items-center bg-charcoal-light rounded-xl p-1 border border-charcoal-border overflow-hidden transition-all duration-300 w-full"
+          :class="open ? 'max-w-full' : 'max-w-12 justify-center border-charcoal-border'">
           <div class="w-10 h-10 rounded-lg bg-charcoal-muted flex items-center justify-center shrink-0">
             <i class="fa-solid fa-building text-marble-400 text-sm"></i>
           </div>
           <div :class="[
             open ? 'opacity-100 max-w-xs ml-2 flex items-center flex-1' : 'opacity-0 max-w-0 overflow-hidden pointer-events-none'
           ]" class="transition-all duration-300 ease-in-out flex items-center w-full">
-            <select
+            <select :value="selectedCompanyId" @change="onCompanyChange"
               class="w-full bg-transparent border-none text-marble-300 text-sm font-medium py-2 pl-1 pr-6 focus:outline-none focus:ring-0 appearance-none cursor-pointer">
-              <option value="all" class="bg-charcoal-light">Todas as Empresas</option>
-              <option value="debs" class="bg-charcoal-light">Debs</option>
-              <option value="recrutamento" selected class="bg-charcoal-light">Recrutamento</option>
-              <option value="padrao" class="bg-charcoal-light">Empresa Padrão</option>
+              <option v-for="company in companiesList" :key="company.id" :value="company.id" class="bg-charcoal-light">
+                {{ company.name }}
+              </option>
             </select>
             <div class="pointer-events-none text-gray-500 shrink-0 pr-2">
               <i class="fa-solid fa-chevron-down text-xs"></i>
@@ -176,7 +230,8 @@ const handleLinkClick = () => {
           </div>
 
           <!-- Tooltip -->
-          <div v-if="!open" class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+          <div v-if="!open"
+            class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
             Empresas
           </div>
         </div>

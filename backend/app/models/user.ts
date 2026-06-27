@@ -59,7 +59,7 @@ export default class User extends BaseModel {
 
   // Colunas para ocultar na serialização (como no Laravel)
   static get hidden() {
-    return ['password', 'is_master', 'token']
+    return ['password', 'isMaster', 'token']
   }
 
   serialize(cherryPick?: any) {

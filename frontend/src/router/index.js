@@ -14,6 +14,8 @@ import ProjectListPage from '@/pages/projects/ProjectListPage.vue'
 import ProjectFormPage from '@/pages/projects/ProjectFormPage.vue'
 import ProjectDetailPage from '@/pages/projects/ProjectDetailPage.vue'
 import ComponentsTestPage from '@/pages/ComponentsTest.vue'
+import CompanyListPage from '@/pages/companies/CompanyListPage.vue'
+import CompanyFormPage from '@/pages/companies/CompanyFormPage.vue'
 
 const routes = [
   {
@@ -97,6 +99,24 @@ const routes = [
         name: 'components.test',
         component: ComponentsTestPage,
       },
+      {
+        path: 'companies',
+        name: 'companies.list',
+        component: CompanyListPage,
+        meta: { requiresMaster: true },
+      },
+      {
+        path: 'companies/create',
+        name: 'companies.create',
+        component: CompanyFormPage,
+        meta: { requiresMaster: true },
+      },
+      {
+        path: 'companies/:id',
+        name: 'companies.edit',
+        component: CompanyFormPage,
+        meta: { requiresMaster: true },
+      },
     ],
   },
 ]
@@ -122,6 +142,10 @@ router.beforeEach(async (to) => {
     const valid = await authStore.validateSession()
     if (!valid) {
       return { name: 'login' }
+    }
+
+    if (to.meta.requiresMaster && !authStore.user?.is_master) {
+      return { name: 'dashboard' }
     }
   }
 

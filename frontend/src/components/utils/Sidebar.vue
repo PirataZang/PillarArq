@@ -155,7 +155,7 @@ const onCompanyChange = (event) => {
           <!-- Single Item -->
           <router-link v-if="!item.children" :to="item.href" :class="[
             isActive(item.href)
-              ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
+              ? 'bg-white/8 text-white border-l-2 border-l-orange-500'
               : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
             'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
           ]" @click="handleLinkClick">
@@ -202,7 +202,7 @@ const onCompanyChange = (event) => {
             <div v-show="openMenus.includes(item.id) && open" class="space-y-1 mt-1 mb-2 transition-all duration-300 ease-in-out" :class="open ? 'pl-4' : 'pl-0'">
               <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href" :title="!open ? subItem.name : ''" :class="[
                 isActive(subItem.href)
-                  ? 'bg-white/8 text-white border-l-2 border-l-marble-400'
+                  ? 'bg-white/8 text-white border-l-2 border-l-orange-500'
                   : 'text-marble-400 hover:bg-charcoal-light/80 hover:text-white',
                 'group flex items-center h-10 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
               ]" @click="handleLinkClick">

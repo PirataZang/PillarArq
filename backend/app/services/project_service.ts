@@ -6,8 +6,8 @@ import LimitException from '#exceptions/limit_exception'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
 import type { createProjectValidator, updateProjectValidator } from '#validators/project_validator'
-import { DEFAULT_PROJECT_PHASES } from '#constants/default_project_phases'
 import { DEFAULT_PROJECT_STATUS } from '#constants/project_status'
+import { resolveProjectPhaseSeeds } from '#utils/company_phase_templates'
 import {
   buildProjectBudgetSummary,
   calculateProgressPercent,
@@ -117,11 +117,14 @@ export default class ProjectService {
       createdBy: userId ?? null,
     })
 
+    const phaseSeeds = await resolveProjectPhaseSeeds(companyId)
+
     await ProjectPhase.createMany(
-      DEFAULT_PROJECT_PHASES.map((phase) => ({
+      phaseSeeds.map((phase) => ({
         companyId,
         projectId: project.id,
         name: phase.name,
+        description: phase.description,
         weightPercent: phase.weightPercent,
         sortOrder: phase.sortOrder,
       }))

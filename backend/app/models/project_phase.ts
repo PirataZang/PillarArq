@@ -16,6 +16,9 @@ export default class ProjectPhase extends BaseModel {
   @column()
   declare name: string
 
+  @column()
+  declare description: string | null
+
   @column({ serializeAs: 'weight_percent' })
   declare weightPercent: number
 

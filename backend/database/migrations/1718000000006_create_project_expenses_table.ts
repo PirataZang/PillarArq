@@ -11,7 +11,7 @@ export default class extends BaseSchema {
 
       table.date('expense_date').notNullable()
       table.string('category').notNullable().defaultTo('OTHER')
-      table.string('description').notNullable()
+      table.text('description').notNullable()
       table.decimal('amount', 12, 2).notNullable().defaultTo(0)
 
       table.timestamp('created_at', { useTz: true }).notNullable()

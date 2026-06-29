@@ -1,6 +1,7 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import Company from '#models/company'
 import User from '#models/user'
+import { seedDefaultPhaseTemplates } from '#utils/company_phase_templates'
 
 export default class extends BaseSeeder {
   async run() {
@@ -11,6 +12,8 @@ export default class extends BaseSeeder {
       slug: 'pillararq',
       isActive: true
     })
+
+    await seedDefaultPhaseTemplates(adminCompany.id)
 
     await User.create({
       companyId: adminCompany.id,

@@ -65,6 +65,27 @@ export class CompanySchema extends BaseModel {
   declare updatedAt: DateTime
 }
 
+export class CompanyPhaseTemplateSchema extends BaseModel {
+  static $columns = ['companyId', 'createdAt', 'description', 'id', 'name', 'sortOrder', 'updatedAt', 'weightPercent'] as const
+  $columns = CompanyPhaseTemplateSchema.$columns
+  @column()
+  declare companyId: bigint | number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare name: string
+  @column()
+  declare sortOrder: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare weightPercent: number
+}
+
 export class ProjectExpenseSchema extends BaseModel {
   static $columns = ['amount', 'category', 'companyId', 'createdAt', 'description', 'expenseDate', 'id', 'projectId', 'updatedAt'] as const
   $columns = ProjectExpenseSchema.$columns
@@ -135,7 +156,7 @@ export class ProjectNoteSchema extends BaseModel {
 }
 
 export class ProjectPhaseSchema extends BaseModel {
-  static $columns = ['companyId', 'completedAt', 'createdAt', 'id', 'isCompleted', 'name', 'projectId', 'sortOrder', 'updatedAt', 'weightPercent'] as const
+  static $columns = ['companyId', 'completedAt', 'createdAt', 'description', 'id', 'isCompleted', 'name', 'projectId', 'sortOrder', 'updatedAt', 'weightPercent'] as const
   $columns = ProjectPhaseSchema.$columns
   @column()
   declare companyId: bigint | number
@@ -143,6 +164,8 @@ export class ProjectPhaseSchema extends BaseModel {
   declare completedAt: DateTime | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column()
+  declare description: string | null
   @column({ isPrimary: true })
   declare id: bigint | number
   @column()

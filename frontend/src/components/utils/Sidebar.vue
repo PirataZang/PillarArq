@@ -33,6 +33,7 @@ const navigation = ref([
   { id: 'projects', name: 'Obras', href: '/projects', icon: 'fa-solid fa-building', permission: 'projects.list' },
   { id: 'clients', name: 'Clientes', href: '/clients', icon: 'fa-solid fa-user-tie' },
   { id: 'users', name: 'Usuários', href: '/users', icon: 'fa-solid fa-users', permission: 'user.list' },
+  { id: 'settings', name: 'Configurações', href: '/settings', icon: 'fa-solid fa-gear' },
   {
     id: 'finance', name: 'Financeiro', icon: 'fa-solid fa-dollar-sign',
     children: [

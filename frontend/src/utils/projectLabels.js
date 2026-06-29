@@ -13,7 +13,6 @@ export const PROJECT_STATUS_OPTIONS = Object.entries(PROJECT_STATUS_LABELS).map(
 }))
 
 export const EXPENSE_CATEGORY_LABELS = {
-  MATERIAL: 'Material',
   LABOR: 'Mão de obra',
   TRANSPORT: 'Transporte',
   FEES: 'Taxas',

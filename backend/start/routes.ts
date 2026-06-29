@@ -10,6 +10,7 @@ const ProjectMaterialsController = () => import('#controllers/http/project_mater
 const ProjectExpensesController = () => import('#controllers/http/project_expenses_controller')
 const ProjectPhasesController = () => import('#controllers/http/project_phases_controller')
 const ProjectNotesController = () => import('#controllers/http/project_notes_controller')
+const CompanySettingsController = () => import('#controllers/http/company_settings_controller')
 
 router.group(() => {
 
@@ -76,6 +77,11 @@ router.group(() => {
       router.get('/projects/:id', [ProjectsController, 'show'])
       router.put('/projects/:id', [ProjectsController, 'update'])
       router.delete('/projects/:id', [ProjectsController, 'destroy'])
+
+      router.get('/settings/phase-templates', [CompanySettingsController, 'listPhaseTemplates'])
+      router.post('/settings/phase-templates', [CompanySettingsController, 'storePhaseTemplate'])
+      router.put('/settings/phase-templates/:id', [CompanySettingsController, 'updatePhaseTemplate'])
+      router.delete('/settings/phase-templates/:id', [CompanySettingsController, 'destroyPhaseTemplate'])
 
     }).use(middleware.tenant())
 

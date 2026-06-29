@@ -1,5 +1,4 @@
 export const EXPENSE_CATEGORIES = [
-  'MATERIAL',
   'LABOR',
   'TRANSPORT',
   'FEES',

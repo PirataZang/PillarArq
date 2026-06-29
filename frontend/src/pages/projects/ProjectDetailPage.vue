@@ -11,6 +11,7 @@ import { formatCurrency } from '@/utils/currency'
 import {
   PROJECT_STATUS_LABELS,
   EXPENSE_CATEGORY_OPTIONS,
+  EXPENSE_CATEGORY_LABELS,
 } from '@/utils/projectLabels'
 import api from '@/services/api'
 
@@ -48,6 +49,7 @@ const expenseForm = reactive({
 })
 
 const noteForm = reactive({ content: '' })
+const expandedExpenseId = ref(null)
 
 const budget = computed(() => project.value?.budget_summary ?? {})
 const materials = computed(() => project.value?.materials ?? [])
@@ -118,8 +120,17 @@ const removeExpense = async (expenseId) => {
   const confirmed = await swal.confirm('Remover gasto', 'Deseja remover este lançamento?')
   if (!confirmed) return
   await api.delete(`/projects/${projectId.value}/expenses/${expenseId}`)
+  if (expandedExpenseId.value === expenseId) {
+    expandedExpenseId.value = null
+  }
   await loadProject()
 }
+
+const toggleExpense = (expenseId) => {
+  expandedExpenseId.value = expandedExpenseId.value === expenseId ? null : expenseId
+}
+
+const getExpenseCategoryLabel = (category) => EXPENSE_CATEGORY_LABELS[category] ?? category
 
 const togglePhase = async (phase) => {
   await api.patch(`/projects/${projectId.value}/phases/${phase.id}`, {
@@ -172,37 +183,37 @@ const removeNote = async (noteId) => {
       </Button>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white rounded-lg ring-1 ring-marble-200 p-4">
-        <p class="text-xs text-marble-500 uppercase tracking-wide">Orçado</p>
-        <p class="text-xl font-semibold text-marble-900 mt-1">{{ formatCurrency(budget.budget_total) }}</p>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <div class="bg-white rounded-lg ring-1 ring-marble-200 px-3 py-2.5">
+        <p class="text-[11px] text-marble-500 uppercase tracking-wide">Orçado</p>
+        <p class="text-lg font-semibold text-marble-900 mt-0.5">{{ formatCurrency(budget.budget_total) }}</p>
       </div>
-      <div class="bg-white rounded-lg ring-1 ring-marble-200 p-4">
-        <p class="text-xs text-marble-500 uppercase tracking-wide">Gasto</p>
-        <p class="text-xl font-semibold text-marble-900 mt-1">{{ formatCurrency(budget.expenses_total) }}</p>
+      <div class="bg-white rounded-lg ring-1 ring-marble-200 px-3 py-2.5">
+        <p class="text-[11px] text-marble-500 uppercase tracking-wide">Gasto</p>
+        <p class="text-lg font-semibold text-marble-900 mt-0.5">{{ formatCurrency(budget.expenses_total) }}</p>
       </div>
-      <div class="bg-white rounded-lg ring-1 ring-marble-200 p-4">
-        <p class="text-xs text-marble-500 uppercase tracking-wide">Saldo</p>
+      <div class="bg-white rounded-lg ring-1 ring-marble-200 px-3 py-2.5">
+        <p class="text-[11px] text-marble-500 uppercase tracking-wide">Saldo</p>
         <p
-          class="text-xl font-semibold mt-1"
+          class="text-lg font-semibold mt-0.5"
           :class="budget.balance >= 0 ? 'text-green-700' : 'text-red-700'"
         >
           {{ formatCurrency(budget.balance) }}
         </p>
       </div>
-      <div class="bg-white rounded-lg ring-1 ring-marble-200 p-4">
-        <p class="text-xs text-marble-500 uppercase tracking-wide">Área</p>
-        <p class="text-xl font-semibold text-marble-900 mt-1">{{ budget.area_m2 }} m²</p>
+      <div class="bg-white rounded-lg ring-1 ring-marble-200 px-3 py-2.5">
+        <p class="text-[11px] text-marble-500 uppercase tracking-wide">Área</p>
+        <p class="text-lg font-semibold text-marble-900 mt-0.5">{{ budget.area_m2 }} m²</p>
       </div>
     </div>
 
-    <div class="border-b border-marble-200 mb-6">
+    <div class="border-b border-marble-200 mb-4">
       <nav class="flex gap-1 overflow-x-auto">
         <button
           v-for="tab in tabs"
           :key="tab.id"
           @click="activeTab = tab.id"
-          class="flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
           :class="
             activeTab === tab.id
               ? 'border-charcoal text-marble-900'
@@ -256,10 +267,6 @@ const removeNote = async (noteId) => {
           <dd class="font-medium">{{ formatCurrency(budget.service_amount) }}</dd>
         </div>
         <div class="flex justify-between">
-          <dt class="text-marble-600">Materiais</dt>
-          <dd class="font-medium">{{ formatCurrency(budget.materials_total) }}</dd>
-        </div>
-        <div class="flex justify-between">
           <dt class="text-marble-600">Extras</dt>
           <dd class="font-medium">{{ formatCurrency(budget.extras_total) }}</dd>
         </div>
@@ -268,8 +275,18 @@ const removeNote = async (noteId) => {
           <dd class="font-semibold">{{ formatCurrency(budget.budget_total) }}</dd>
         </div>
         <div class="flex justify-between">
-          <dt class="text-marble-600">Gasto registrado</dt>
-          <dd class="font-medium text-red-700">{{ formatCurrency(budget.expenses_total) }}</dd>
+          <dt class="text-marble-600">Materiais</dt>
+          <dd class="font-medium text-red-700">{{ formatCurrency(budget.materials_total) }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-marble-600">Outros gastos</dt>
+          <dd class="font-medium text-red-700">
+            {{ formatCurrency(budget.expenses_total - budget.materials_total) }}
+          </dd>
+        </div>
+        <div class="flex justify-between border-t border-marble-200 pt-2">
+          <dt class="font-semibold text-marble-900">Total gasto</dt>
+          <dd class="font-semibold text-red-700">{{ formatCurrency(budget.expenses_total) }}</dd>
         </div>
         <div class="flex justify-between border-t border-marble-200 pt-4 text-base">
           <dt class="font-semibold text-marble-900">Saldo disponível</dt>
@@ -332,55 +349,101 @@ const removeNote = async (noteId) => {
     </div>
 
     <!-- Expenses -->
-    <div v-if="activeTab === 'expenses'" class="space-y-6">
-      <Card title="Registrar gasto">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Input v-model="expenseForm.expense_date" label="Data" type="date" />
-          <Select
-            v-model="expenseForm.category"
-            label="Categoria"
-            :options="EXPENSE_CATEGORY_OPTIONS"
+    <div v-if="activeTab === 'expenses'" class="space-y-4">
+      <div class="bg-white rounded-lg ring-1 ring-marble-200 overflow-hidden">
+        <div class="px-4 py-2.5 border-b border-marble-100 bg-marble-50/50">
+          <h3 class="text-sm font-semibold text-marble-900">Registrar gasto</h3>
+        </div>
+        <div class="p-4 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Input v-model="expenseForm.expense_date" label="Data" type="date" />
+            <Select
+              v-model="expenseForm.category"
+              label="Categoria"
+              :options="EXPENSE_CATEGORY_OPTIONS"
+            />
+            <Input v-model="expenseForm.amount" label="Valor (R$)" type="number" />
+          </div>
+          <Textarea
+            v-model="expenseForm.description"
+            label="Descrição"
+            rows="2"
+            placeholder="Detalhes do gasto..."
           />
-          <Input v-model="expenseForm.description" label="Descrição" />
-          <Input v-model="expenseForm.amount" label="Valor (R$)" type="number" />
+          <div class="flex justify-end pt-1">
+            <Button variant="primary" size="sm" @click="addExpense">
+              <i class="fa-solid fa-plus mr-1.5"></i>
+              Registrar
+            </Button>
+          </div>
         </div>
-        <div class="mt-4 flex justify-end">
-          <Button variant="primary" @click="addExpense">
-            <i class="fa-solid fa-plus mr-2"></i>
-            Registrar
-          </Button>
-        </div>
-      </Card>
+      </div>
 
-      <Card title="Gastos da obra">
-        <div v-if="expenses.length === 0" class="text-sm text-marble-500">Nenhum gasto registrado.</div>
-        <div v-else class="overflow-x-auto">
-          <table class="min-w-full text-sm">
-            <thead>
-              <tr class="border-b border-marble-200 text-left text-marble-500">
-                <th class="py-2 pr-4">Data</th>
-                <th class="py-2 pr-4">Categoria</th>
-                <th class="py-2 pr-4">Descrição</th>
-                <th class="py-2 pr-4">Valor</th>
-                <th class="py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="expense in expenses" :key="expense.id" class="border-b border-marble-100">
-                <td class="py-3 pr-4">{{ expense.expense_date }}</td>
-                <td class="py-3 pr-4">{{ expense.category }}</td>
-                <td class="py-3 pr-4">{{ expense.description }}</td>
-                <td class="py-3 pr-4 font-medium">{{ formatCurrency(expense.amount) }}</td>
-                <td class="py-3 text-right">
-                  <button class="text-red-600 hover:text-red-800" @click="removeExpense(expense.id)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <div class="bg-white rounded-lg ring-1 ring-marble-200 overflow-hidden">
+        <div class="px-4 py-2.5 border-b border-marble-100 bg-marble-50/50">
+          <h3 class="text-sm font-semibold text-marble-900">Gastos da obra</h3>
         </div>
-      </Card>
+        <div class="p-4">
+          <div v-if="expenses.length === 0" class="text-sm text-marble-500 py-2">Nenhum gasto registrado.</div>
+          <div v-else class="space-y-2">
+            <div
+              v-for="expense in expenses"
+              :key="expense.id"
+              class="rounded-lg border transition-colors"
+              :class="
+                expandedExpenseId === expense.id
+                  ? 'border-marble-300 ring-1 ring-marble-200'
+                  : 'border-marble-200 hover:border-marble-300'
+              "
+            >
+              <div
+                class="flex items-center gap-2 px-3 py-2 text-sm"
+                :class="expandedExpenseId === expense.id ? 'bg-marble-50' : 'bg-white'"
+              >
+                <button
+                  type="button"
+                  class="flex-1 flex items-center gap-3 min-w-0 text-left"
+                  @click="toggleExpense(expense.id)"
+                >
+                  <span class="w-[92px] shrink-0 text-xs text-marble-500 tabular-nums">
+                    {{ expense.expense_date }}
+                  </span>
+                  <span class="flex-1 min-w-0 truncate text-marble-700">
+                    {{ getExpenseCategoryLabel(expense.category) }}
+                  </span>
+                  <span class="w-[88px] shrink-0 text-right font-medium text-marble-900 tabular-nums">
+                    {{ formatCurrency(expense.amount) }}
+                  </span>
+                  <i
+                    class="fa-solid fa-chevron-down text-[10px] text-marble-400 shrink-0 transition-transform duration-200"
+                    :class="{ 'rotate-180': expandedExpenseId === expense.id }"
+                  ></i>
+                </button>
+                <button
+                  type="button"
+                  class="text-marble-400 hover:text-red-600 shrink-0 p-1 transition-colors"
+                  title="Remover gasto"
+                  @click="removeExpense(expense.id)"
+                >
+                  <i class="fa-solid fa-trash text-xs"></i>
+                </button>
+              </div>
+
+              <div
+                v-show="expandedExpenseId === expense.id"
+                class="px-3 pb-3 pt-2 border-t border-marble-100 bg-white"
+              >
+                <Textarea
+                  :model-value="expense.description"
+                  label="Descrição"
+                  :min-height="300"
+                  disabled
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Progress -->
@@ -397,21 +460,28 @@ const removeNote = async (noteId) => {
           ></div>
         </div>
       </div>
-      <div class="space-y-3">
+      <div class="space-y-2">
         <label
           v-for="phase in phases"
           :key="phase.id"
-          class="flex items-center gap-3 p-3 rounded-lg border border-marble-200 hover:bg-marble-50 cursor-pointer"
+          class="flex items-start gap-3 p-3 rounded-lg border border-marble-200 hover:bg-marble-50 cursor-pointer"
         >
           <input
             type="checkbox"
             :checked="phase.is_completed"
-            class="h-4 w-4 rounded border-marble-300 text-marble-700"
+            class="h-4 w-4 mt-0.5 rounded border-marble-300 text-marble-700 shrink-0"
             @change="togglePhase(phase)"
           />
-          <div class="flex-1">
-            <p class="text-sm font-medium text-marble-900">{{ phase.name }}</p>
-            <p class="text-xs text-marble-500">{{ phase.weight_percent }}% do projeto</p>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="text-sm font-medium text-marble-900">{{ phase.name }}</p>
+              <span class="text-xs text-marble-500 bg-marble-100 px-2 py-0.5 rounded">
+                {{ phase.weight_percent }}%
+              </span>
+            </div>
+            <p v-if="phase.description" class="text-xs text-marble-500 mt-1.5 whitespace-pre-wrap">
+              {{ phase.description }}
+            </p>
           </div>
         </label>
       </div>

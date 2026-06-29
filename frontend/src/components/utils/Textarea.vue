@@ -11,6 +11,7 @@ const props = defineProps({
   error: { type: String, default: '' },
   helperText: { type: String, default: '' },
   rows: { type: [Number, String], default: 3 },
+  minHeight: { type: [Number, String], default: null },
   maxlength: { type: [Number, String], default: null },
   minlength: { type: [Number, String], default: null }
 })
@@ -20,6 +21,12 @@ const emit = defineEmits(['update:modelValue', 'blur', 'focus', 'change'])
 const id = `textarea-${Math.random().toString(36).substring(2, 9)}`
 
 const hasError = computed(() => !!props.error)
+
+const textareaStyle = computed(() => {
+  if (!props.minHeight) return undefined
+  const value = typeof props.minHeight === 'number' ? `${props.minHeight}px` : props.minHeight
+  return { minHeight: value }
+})
 </script>
 
 <template>
@@ -34,6 +41,7 @@ const hasError = computed(() => !!props.error)
         :id="id"
         :value="modelValue"
         :rows="rows"
+        :style="textareaStyle"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="readonly"
@@ -45,13 +53,14 @@ const hasError = computed(() => !!props.error)
         @blur="$emit('blur', $event)"
         @focus="$emit('focus', $event)"
         @change="$emit('change', $event)"
-        class="block w-full rounded-md border-0 py-2 px-3 text-marble-900 shadow-sm ring-1 ring-inset sm:text-sm sm:leading-6 transition-all duration-200 bg-white placeholder:text-marble-400 focus:outline-none focus:ring-2 focus:ring-marble-400/40"
+        class="block w-full rounded-md border-0 py-2 px-3 shadow-sm ring-1 ring-inset sm:text-sm sm:leading-6 transition-all duration-200 resize-y placeholder:text-marble-400 focus:outline-none focus:ring-2 focus:ring-marble-400/40"
         :class="[
-          hasError 
-            ? 'ring-red-300 text-red-900 placeholder:text-red-300' 
-            : 'ring-marble-300',
-          disabled ? 'bg-marble-50 text-marble-500 cursor-not-allowed' : '',
-          readonly && !disabled ? 'bg-marble-50 focus:ring-marble-300 cursor-default' : ''
+          hasError
+            ? 'bg-white text-red-900 ring-red-300 placeholder:text-red-300'
+            : disabled || readonly
+              ? 'bg-marble-100 text-marble-700 ring-marble-200 cursor-default resize-none'
+              : 'bg-white text-marble-900 ring-marble-300',
+          disabled ? 'cursor-not-allowed opacity-90' : '',
         ]"
       ></textarea>
       <div v-if="error" class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pt-3">

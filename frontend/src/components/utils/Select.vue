@@ -3,6 +3,7 @@
     <label v-if="label" v-html="label" class="block text-[13px] font-medium text-gray-700"></label>
 
     <div 
+      ref="triggerRef"
       class="flex items-center min-h-[42px] px-3 py-1.5 border-[1.5px] rounded-lg bg-white cursor-pointer transition-all duration-200 select-none gap-2"
       :class="[
         disabled ? 'bg-marble-50 opacity-65 cursor-not-allowed pointer-events-none border-marble-200' : 'border-marble-200 hover:border-marble-400 hover:bg-marble-50',
@@ -69,50 +70,59 @@
     </div>
 
     <!-- Dropdown -->
-    <Transition 
-      enter-active-class="transition ease-out duration-150"
-      enter-from-class="opacity-0 -translate-y-1 scale-95"
-      enter-to-class="opacity-100 translate-y-0 scale-100"
-      leave-active-class="transition ease-in duration-100"
-      leave-from-class="opacity-100 translate-y-0 scale-100"
-      leave-to-class="opacity-0 -translate-y-1 scale-95"
-    >
-      <div v-if="isOpen" class="absolute top-[calc(100%+6px)] left-0 right-0 z-[9999] bg-white border-[1.5px] border-gray-200 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] overflow-hidden" role="listbox" :aria-multiselectable="multiple.toString()" @click.stop>
-        
-        <ul class="m-0 py-1.5 max-h-[240px] overflow-y-auto custom-scrollbar">
-          <li v-if="filteredOptions.length === 0" class="flex items-center justify-center gap-2 py-2 px-3 text-sm text-gray-400 italic cursor-default">
-            <svg class="opacity-50" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
-              <circle cx="8" cy="8" r="6.5" />
-              <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" />
-            </svg>
-            Nenhuma opção encontrada
-          </li>
-          <li v-for="opt in filteredOptions" :key="opt.value" 
-            class="flex items-center gap-2 py-2.5 px-3 text-sm cursor-pointer transition-colors"
-            :class="[
-              opt.disabled ? 'text-marble-400 cursor-not-allowed hover:bg-transparent' : 'text-marble-700 hover:bg-marble-100 hover:text-marble-900',
-              isSelected(opt) && !opt.disabled ? 'bg-marble-100 text-marble-900 font-medium' : ''
-            ]" 
-            @click.stop="select(opt)" role="option" :aria-selected="isSelected(opt).toString()">
-            
-            <span v-if="multiple" 
-              class="w-4 h-4 border-[1.5px] rounded flex items-center justify-center flex-shrink-0 transition-colors text-white"
-              :class="isSelected(opt) ? 'bg-marble-700 border-marble-700' : 'border-marble-300'"
-            >
-              <svg v-if="isSelected(opt)" width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M1.5 5L4 7.5L8.5 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    <Teleport to="body">
+      <Transition 
+        enter-active-class="transition ease-out duration-150"
+        enter-from-class="opacity-0 -translate-y-1 scale-95"
+        enter-to-class="opacity-100 translate-y-0 scale-100"
+        leave-active-class="transition ease-in duration-100"
+        leave-from-class="opacity-100 translate-y-0 scale-100"
+        leave-to-class="opacity-0 -translate-y-1 scale-95"
+      >
+        <div
+          v-if="isOpen"
+          ref="dropdownRef"
+          class="fixed z-[99999] bg-white border-[1.5px] border-gray-200 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] overflow-hidden"
+          :style="dropdownStyle"
+          role="listbox"
+          :aria-multiselectable="multiple.toString()"
+          @click.stop
+        >
+          <ul class="m-0 py-1.5 max-h-[240px] overflow-y-auto custom-scrollbar">
+            <li v-if="filteredOptions.length === 0" class="flex items-center justify-center gap-2 py-2 px-3 text-sm text-gray-400 italic cursor-default">
+              <svg class="opacity-50" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="8" cy="8" r="6.5" />
+                <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" />
               </svg>
-            </span>
-            <span v-else-if="isSelected(opt)" class="inline-flex items-center justify-center flex-shrink-0 text-marble-700">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2 6L5 9L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </span>
-            <span class="flex-1" v-html="opt.label"></span>
-          </li>
-        </ul>
-      </div>
-    </Transition>
+              Nenhuma opção encontrada
+            </li>
+            <li v-for="opt in filteredOptions" :key="opt.value" 
+              class="flex items-center gap-2 py-2.5 px-3 text-sm cursor-pointer transition-colors"
+              :class="[
+                opt.disabled ? 'text-marble-400 cursor-not-allowed hover:bg-transparent' : 'text-marble-700 hover:bg-marble-100 hover:text-marble-900',
+                isSelected(opt) && !opt.disabled ? 'bg-marble-100 text-marble-900 font-medium' : ''
+              ]" 
+              @click.stop="select(opt)" role="option" :aria-selected="isSelected(opt).toString()">
+              
+              <span v-if="multiple" 
+                class="w-4 h-4 border-[1.5px] rounded flex items-center justify-center flex-shrink-0 transition-colors text-white"
+                :class="isSelected(opt) ? 'bg-marble-700 border-marble-700' : 'border-marble-300'"
+              >
+                <svg v-if="isSelected(opt)" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M1.5 5L4 7.5L8.5 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span v-else-if="isSelected(opt)" class="inline-flex items-center justify-center flex-shrink-0 text-marble-700">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6L5 9L10 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="flex-1" v-html="opt.label"></span>
+            </li>
+          </ul>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -161,7 +171,20 @@ const clearable = computed(() => !!props.clearable)
 const isOpen = ref(false)
 const searchTerm = ref('')
 const root = ref<HTMLElement | null>(null)
+const triggerRef = ref<HTMLElement | null>(null)
+const dropdownRef = ref<HTMLElement | null>(null)
 const searchInputRef = ref<HTMLInputElement | null>(null)
+const dropdownStyle = ref<Record<string, string>>({})
+
+function updateDropdownPosition() {
+  if (!triggerRef.value) return
+  const rect = triggerRef.value.getBoundingClientRect()
+  dropdownStyle.value = {
+    top: `${rect.bottom + 6}px`,
+    left: `${rect.left}px`,
+    width: `${rect.width}px`,
+  }
+}
 
 const selectedValues = ref<Array<string | number>>(
   multiple.value
@@ -234,9 +257,14 @@ function handleDisplayClick(e: Event) {
   if (isOpen.value && searchInputRef.value && e.target === searchInputRef.value) return
 
   isOpen.value = !isOpen.value
-  if (isOpen.value && search.value) {
-    searchTerm.value = ''
-    nextTick(() => searchInputRef.value?.focus())
+  if (isOpen.value) {
+    nextTick(() => {
+      updateDropdownPosition()
+      if (search.value) {
+        searchTerm.value = ''
+        searchInputRef.value?.focus()
+      }
+    })
   } else {
     searchTerm.value = ''
   }
@@ -256,13 +284,32 @@ function navigateToLink() {
 }
 
 function handleClickOutside(e: MouseEvent) {
-  if (root.value && !root.value.contains(e.target as Node)) {
-    close()
-  }
+  const target = e.target as Node
+  if (root.value?.contains(target) || dropdownRef.value?.contains(target)) return
+  close()
 }
 
+function handleScrollOrResize() {
+  if (isOpen.value) updateDropdownPosition()
+}
+
+watch(isOpen, (open) => {
+  if (open) {
+    nextTick(updateDropdownPosition)
+    window.addEventListener('scroll', handleScrollOrResize, true)
+    window.addEventListener('resize', handleScrollOrResize)
+  } else {
+    window.removeEventListener('scroll', handleScrollOrResize, true)
+    window.removeEventListener('resize', handleScrollOrResize)
+  }
+})
+
 onMounted(() => document.addEventListener('mousedown', handleClickOutside))
-onBeforeUnmount(() => document.removeEventListener('mousedown', handleClickOutside))
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
+  window.removeEventListener('scroll', handleScrollOrResize, true)
+  window.removeEventListener('resize', handleScrollOrResize)
+})
 </script>
 
 <style>

@@ -2,6 +2,7 @@ import Company from '#models/company'
 import type { Infer } from '@vinejs/vine/types'
 import type { createCompanyValidator, updateCompanyValidator } from '#validators/company_validator'
 import { DateTime } from 'luxon'
+import { seedDefaultPhaseTemplates } from '#utils/company_phase_templates'
 
 type CreateCompanyPayload = Infer<typeof createCompanyValidator>
 type UpdateCompanyPayload = Infer<typeof updateCompanyValidator>
@@ -16,13 +17,17 @@ export default class CompanyService {
   }
 
   async store(payload: CreateCompanyPayload) {
-    return Company.create({
+    const company = await Company.create({
       name: payload.name,
       slug: payload.slug,
       isActive: payload.is_active !== undefined ? !!payload.is_active : true,
       maxUsers: payload.max_users !== undefined ? payload.max_users : 5,
       maxProjects: payload.max_projects !== undefined ? payload.max_projects : 5
     })
+
+    await seedDefaultPhaseTemplates(company.id)
+
+    return company
   }
 
   async update(id: string, payload: UpdateCompanyPayload) {

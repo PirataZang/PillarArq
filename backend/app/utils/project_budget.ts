@@ -65,8 +65,8 @@ export function buildProjectBudgetSummary(project: Project): ProjectBudgetSummar
   const serviceAmount = areaM2 * serviceRate
   const materialsTotal = calculateMaterialsTotal(project)
   const extrasTotal = toNumber(project.extraAmount)
-  const budgetTotal = serviceAmount + materialsTotal + extrasTotal
-  const expensesTotal = calculateExpensesTotal(project)
+  const budgetTotal = serviceAmount + extrasTotal
+  const expensesTotal = calculateExpensesTotal(project) + materialsTotal
 
   return {
     area_m2: areaM2,

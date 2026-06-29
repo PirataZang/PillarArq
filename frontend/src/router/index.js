@@ -17,6 +17,7 @@ import ProjectDetailPage from '@/pages/projects/ProjectDetailPage.vue'
 import ComponentsTestPage from '@/pages/ComponentsTest.vue'
 import CompanyListPage from '@/pages/companies/CompanyListPage.vue'
 import CompanyFormPage from '@/pages/companies/CompanyFormPage.vue'
+import SettingsPage from '@/pages/settings/SettingsPage.vue'
 
 const routes = [
   {
@@ -124,6 +125,12 @@ const routes = [
         name: 'companies.edit',
         component: CompanyFormPage,
         meta: { requiresMaster: true, title: 'Empresas' },
+      },
+      {
+        path: 'settings',
+        name: 'settings',
+        component: SettingsPage,
+        meta: { title: 'Configurações' },
       },
     ],
   },

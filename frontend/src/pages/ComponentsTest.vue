@@ -269,11 +269,11 @@ const isModalOpen = ref(false)
 
 // SweetAlert tests
 const testSwalConfirm = async () => {
-  const result = await swal.confirm({
+  const confirmed = await swal.confirm({
     title: 'Apagar Projeto?',
-    text: 'Todos os arquivos vinculados a este projeto serão perdidos.'
+    text: 'Todos os arquivos vinculados a este projeto serão perdidos.',
   })
-  if (result.isConfirmed) {
+  if (confirmed) {
     swal.success('Deletado!', 'Projeto apagado com sucesso.')
   }
 }

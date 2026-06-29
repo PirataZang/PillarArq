@@ -246,7 +246,11 @@ const openProject = (project) => {
 }
 
 const confirmArchiveOne = async (project) => {
-  const confirmed = await swal.confirm('Arquivar obra', `Deseja arquivar "${project.name}"?`)
+  const confirmed = await swal.confirm({
+    title: 'Arquivar obra',
+    text: `Deseja arquivar "${project.name}"?`,
+    icon: 'warning',
+  })
   if (!confirmed) return
 
   try {
@@ -260,9 +264,11 @@ const confirmArchiveOne = async (project) => {
 
 const confirmRestoreOne = async (project) => {
   const confirmed = await swal.confirm(
-    'Reativar obra',
-    `Deseja reativar "${project.name}"? Ela voltará para a lista de obras ativas como rascunho.`
-  )
+    {
+      title: 'Reativar obra',
+      text: `Deseja reativar "${project.name}"? Ela voltará para a lista de obras ativas como rascunho.`,
+      icon: 'warning',
+    })
   if (!confirmed) return
 
   try {
@@ -291,24 +297,15 @@ const confirmRestoreOne = async (project) => {
     </div>
 
     <div class="inline-flex items-center gap-1 p-1 bg-marble-100 rounded-xl mb-4">
-      <button
-        v-for="tab in viewTabs"
-        :key="tab.id"
-        type="button"
-        class="px-4 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="
-          activeView === tab.id
+      <button v-for="tab in viewTabs" :key="tab.id" type="button"
+        class="px-4 py-2 text-sm font-medium rounded-lg transition-all" :class="activeView === tab.id
             ? 'bg-charcoal text-white shadow-sm'
             : 'text-marble-600 hover:text-marble-900 hover:bg-white/70'
-        "
-        @click="activeView = tab.id"
-      >
+          " @click="activeView = tab.id">
         {{ tab.label }}
-        <span
-          v-if="tab.id === 'filters' && activeFiltersCount > 0"
+        <span v-if="tab.id === 'filters' && activeFiltersCount > 0"
           class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] rounded-full bg-white/20"
-          :class="activeView === tab.id ? 'text-white' : 'bg-marble-200 text-marble-700'"
-        >
+          :class="activeView === tab.id ? 'text-white' : 'bg-marble-200 text-marble-700'">
           {{ activeFiltersCount }}
         </span>
       </button>
@@ -317,21 +314,10 @@ const confirmRestoreOne = async (project) => {
     <div v-if="activeView === 'filters'" class="bg-white rounded-xl shadow-sm ring-1 ring-marble-200 p-5 mb-4">
       <h2 class="text-sm font-semibold text-marble-900 mb-4">Filtrar obras</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Select
-          v-model="filters.status"
-          label="Status"
-          placeholder="Todos"
-          :options="[{ value: '', label: 'Todos' }, ...statusFilterOptions]"
-          :clearable="false"
-        />
-        <Select
-          v-model="filters.client_id"
-          label="Cliente"
-          placeholder="Todos"
-          search
-          :options="[{ value: '', label: 'Todos' }, ...clientOptions]"
-          :clearable="false"
-        />
+        <Select v-model="filters.status" label="Status" placeholder="Todos"
+          :options="[{ value: '', label: 'Todos' }, ...statusFilterOptions]" :clearable="false" />
+        <Select v-model="filters.client_id" label="Cliente" placeholder="Todos" search
+          :options="[{ value: '', label: 'Todos' }, ...clientOptions]" :clearable="false" />
         <Input v-model="filters.progress_min" label="Progresso mínimo (%)" type="number" placeholder="0" />
         <Input v-model="filters.progress_max" label="Progresso máximo (%)" type="number" placeholder="100" />
         <Input v-model="filters.start_date_from" label="Início a partir de" type="date" />
@@ -357,50 +343,31 @@ const confirmRestoreOne = async (project) => {
 
         <div class="flex-1 max-w-xl mx-auto w-full">
           <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-marble-400 text-sm"></i>
-            <input
-              v-model="search"
-              type="search"
-              placeholder="Pesquisar obra, cliente ou endereço..."
-              class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-marble-200 bg-white text-marble-900 placeholder:text-marble-400 focus:outline-none focus:ring-2 focus:ring-marble-400/30 focus:border-marble-400"
-            />
+            <i
+              class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-marble-400 text-sm"></i>
+            <input v-model="search" type="search" placeholder="Pesquisar obra, cliente ou endereço..."
+              class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-marble-200 bg-white text-marble-900 placeholder:text-marble-400 focus:outline-none focus:ring-2 focus:ring-marble-400/30 focus:border-marble-400" />
           </div>
         </div>
 
-        <button
-          type="button"
+        <button type="button"
           class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-marble-700 hover:text-marble-900 hover:bg-marble-100 rounded-lg transition-colors shrink-0"
-          @click="activeView = 'filters'"
-        >
+          @click="activeView = 'filters'">
           <i class="fa-solid fa-filter text-marble-500"></i>
           Filtrar por
-          <span
-            v-if="activeFiltersCount > 0"
-            class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] rounded-full bg-charcoal text-white"
-          >
+          <span v-if="activeFiltersCount > 0"
+            class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] rounded-full bg-charcoal text-white">
             {{ activeFiltersCount }}
           </span>
         </button>
       </div>
 
-      <div
-        class="bg-white w-full rounded-xl shadow-sm ring-1 ring-marble-200 overflow-hidden"
-        :class="{ 'opacity-60 pointer-events-none': loading }"
-      >
-        <Grid
-          :rowData="paginatedProjects"
-          :columnDefs="columnDefs"
-          :totalRows="projects.length"
-          :currentPage="currentPage"
-          :pageSize="pageSize"
-          :selectable="false"
-          grid-height="calc(100vh - 320px)"
-          :context="gridContext"
-          :defaultColDef="{ sortable: true, filter: false, resizable: false }"
-          @update:page="currentPage = $event"
-          @update:pageSize="pageSize = $event"
-          @row-click="openProject"
-        />
+      <div class="bg-white w-full rounded-xl shadow-sm ring-1 ring-marble-200 overflow-hidden"
+        :class="{ 'opacity-60 pointer-events-none': loading }">
+        <Grid :rowData="paginatedProjects" :columnDefs="columnDefs" :totalRows="projects.length"
+          :currentPage="currentPage" :pageSize="pageSize" :selectable="false" grid-height="calc(100vh - 320px)"
+          :context="gridContext" :defaultColDef="{ sortable: true, filter: false, resizable: false }"
+          @update:page="currentPage = $event" @update:pageSize="pageSize = $event" @row-click="openProject" />
       </div>
     </template>
   </div>

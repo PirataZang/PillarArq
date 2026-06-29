@@ -78,4 +78,15 @@ export default class ProjectsController {
       data: {},
     })
   }
+
+  async restore({ auth, params, response }: HttpContext) {
+    const user = auth.user as User
+    const project = await this.projectService.restore(user.companyId, params.id, user.id)
+
+    return response.ok({
+      success: true,
+      message: 'Project restored successfully',
+      data: project,
+    })
+  }
 }

@@ -76,6 +76,7 @@ router.group(() => {
 
       router.get('/projects/:id', [ProjectsController, 'show'])
       router.put('/projects/:id', [ProjectsController, 'update'])
+      router.patch('/projects/:id/restore', [ProjectsController, 'restore'])
       router.delete('/projects/:id', [ProjectsController, 'destroy'])
 
       router.get('/settings/phase-templates', [CompanySettingsController, 'listPhaseTemplates'])

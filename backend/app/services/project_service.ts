@@ -20,9 +20,7 @@ type UpdateProjectPayload = Infer<typeof updateProjectValidator>
 
 export default class ProjectService {
   private activeQuery(companyId: string) {
-    return Project.query()
-      .where('companyId', companyId)
-      .whereNull('deletedAt')
+    return Project.query().where('companyId', companyId).whereNot('status', 'ARCHIVED')
   }
 
   private async findProjectOrFail(companyId: string, projectId: string) {
@@ -96,7 +94,6 @@ export default class ProjectService {
 
       const currentActiveCount = await Project.query()
         .where('companyId', companyId)
-        .whereNull('deletedAt')
         .whereNot('status', 'ARCHIVED')
         .count('* as total')
         .first()
@@ -158,7 +155,6 @@ export default class ProjectService {
 
       const currentActiveCount = await Project.query()
         .where('companyId', companyId)
-        .whereNull('deletedAt')
         .whereNot('status', 'ARCHIVED')
         .count('* as total')
         .first()
@@ -170,6 +166,9 @@ export default class ProjectService {
         )
       }
     }
+
+    const unarchiving =
+      project.status === 'ARCHIVED' && payload.status !== undefined && payload.status !== 'ARCHIVED'
 
     const {
       client_id,
@@ -195,6 +194,7 @@ export default class ProjectService {
       ...(expected_end_date !== undefined
         ? { expectedEndDate: parseSqlDate(expected_end_date) }
         : {}),
+      ...(unarchiving ? { deletedAt: null } : {}),
       updatedBy: userId ?? null,
     })
 
@@ -209,5 +209,36 @@ export default class ProjectService {
     project.deletedAt = DateTime.now()
     project.updatedBy = userId ?? null
     await project.save()
+  }
+
+  async restore(companyId: string, projectId: string, userId?: string) {
+    const project = await Project.query()
+      .where('companyId', companyId)
+      .where('id', projectId)
+      .where('status', 'ARCHIVED')
+      .firstOrFail()
+
+    const company = await Company.query().where('id', companyId).whereNull('deletedAt').firstOrFail()
+
+    const currentActiveCount = await Project.query()
+      .where('companyId', companyId)
+      .whereNot('status', 'ARCHIVED')
+      .count('* as total')
+      .first()
+
+    const activeTotal = Number(currentActiveCount?.$extras.total || 0)
+    if (activeTotal >= company.maxProjects) {
+      throw new LimitException(
+        `Você atingiu o limite de obras ativas para sua empresa (máximo ${company.maxProjects}). Se desejar aumentar o limite, por favor entre em contato com o suporte.`
+      )
+    }
+
+    project.status = 'DRAFT'
+    project.deletedAt = null
+    project.updatedBy = userId ?? null
+    await project.save()
+
+    await this.loadProjectDetails(project)
+    return this.serializeProject(project)
   }
 }

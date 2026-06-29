@@ -98,10 +98,7 @@ export default class Project extends BaseModel {
   }
 
   static scopeActive(companyId: string) {
-    return this.query()
-      .where('companyId', companyId)
-      .whereNull('deletedAt')
-      .whereNot('status', 'ARCHIVED')
+    return this.query().where('companyId', companyId).whereNot('status', 'ARCHIVED')
   }
 
   static scopeArchived(companyId: string) {

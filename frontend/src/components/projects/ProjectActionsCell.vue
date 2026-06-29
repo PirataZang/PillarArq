@@ -17,6 +17,10 @@ const openProject = () => {
 const archiveProject = () => {
   props.params?.context?.onArchive?.(props.params.data)
 }
+
+const restoreProject = () => {
+  props.params?.context?.onRestore?.(props.params.data)
+}
 </script>
 
 <template>
@@ -28,6 +32,15 @@ const archiveProject = () => {
       @click.stop="openProject"
     >
       <i class="fa-solid fa-eye text-sm"></i>
+    </button>
+    <button
+      v-if="params?.context?.showRestore"
+      type="button"
+      class="p-2 text-marble-400 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+      title="Reativar obra"
+      @click.stop="restoreProject"
+    >
+      <i class="fa-solid fa-rotate-left text-sm"></i>
     </button>
     <button
       v-if="params?.context?.showArchive"

@@ -28,7 +28,7 @@ export function applyProjectScopes(
   if (filters.archived) {
     query.where('status', 'ARCHIVED')
   } else {
-    query.whereNull('deletedAt').whereNot('status', 'ARCHIVED')
+    query.whereNot('status', 'ARCHIVED')
   }
 
   if (filters.search?.trim()) {

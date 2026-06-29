@@ -107,7 +107,7 @@ const columnDefs = [
   {
     field: 'actions',
     headerName: '',
-    width: 90,
+    width: 110,
     sortable: false,
     filter: false,
     cellRenderer: ProjectActionsCell,
@@ -117,7 +117,9 @@ const columnDefs = [
 
 const gridContext = computed(() => ({
   showArchive: activeView.value === 'active',
+  showRestore: activeView.value === 'archived',
   onArchive: confirmArchiveOne,
+  onRestore: confirmRestoreOne,
 }))
 
 const paginatedProjects = computed(() => {
@@ -253,6 +255,22 @@ const confirmArchiveOne = async (project) => {
     await fetchProjects()
   } catch (err) {
     swal.error('Erro', 'Não foi possível arquivar a obra.')
+  }
+}
+
+const confirmRestoreOne = async (project) => {
+  const confirmed = await swal.confirm(
+    'Reativar obra',
+    `Deseja reativar "${project.name}"? Ela voltará para a lista de obras ativas como rascunho.`
+  )
+  if (!confirmed) return
+
+  try {
+    await api.patch(`/projects/${project.id}/restore`)
+    swal.success('Obra reativada com sucesso!')
+    await fetchProjects()
+  } catch (err) {
+    swal.error('Erro', err.response?.data?.message || 'Não foi possível reativar a obra.')
   }
 }
 </script>

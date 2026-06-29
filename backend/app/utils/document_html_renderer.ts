@@ -32,7 +32,24 @@ export function resolveVariablesInHtml(html: string, variables: Record<string, s
 
 export function renderDocumentBodyHtml(content: Record<string, unknown> | null | undefined): string {
   const doc = content && typeof content === 'object' ? content : EMPTY_DOCUMENT
-  return generateHTML(doc, createDocumentPdfExtensions())
+  const html = generateHTML(doc, createDocumentPdfExtensions())
+  return flattenSectionsForPdf(html)
+}
+
+/** Seções são containers do editor — no PDF exportamos só o conteúdo interno */
+export function flattenSectionsForPdf(html: string): string {
+  let result = html
+  let previous = ''
+
+  while (result !== previous) {
+    previous = result
+    result = result.replace(
+      /<section[^>]*\bdata-section-block\b[^>]*>([\s\S]*?)<\/section>/gi,
+      '$1'
+    )
+  }
+
+  return result.replace(/<p[^>]*>\s*<\/p>/gi, '').trim()
 }
 
 export function wrapDocumentHtml(bodyHtml: string, title: string): string {
@@ -64,16 +81,6 @@ export function wrapDocumentHtml(bodyHtml: string, title: string): string {
 
     .document-body {
       width: 100%;
-    }
-
-    section[data-section-block],
-    .section-block {
-      border: 1px solid #bae6fd;
-      border-radius: 8px;
-      background: #f0f9ff;
-      padding: 16px 20px;
-      margin: 0 0 16px;
-      page-break-inside: avoid;
     }
 
     h1 {

@@ -26,7 +26,7 @@ export const SectionBlock = Node.create({
       'section',
       mergeAttributes(HTMLAttributes, {
         'data-section-block': '',
-        class: 'section-block',
+        class: 'pdf-section',
       }),
       0,
     ]

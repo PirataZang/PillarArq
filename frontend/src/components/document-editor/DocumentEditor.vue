@@ -12,6 +12,7 @@ import {
   PAGE_CONTENT_HEIGHT,
   PAGE_GAP_PX,
 } from './constants/a4'
+import { applySectionPageBreaks, layoutSectionsForPages } from './utils/sectionPageBreaks'
 
 const props = defineProps({
   modelValue: { type: Object, default: null },
@@ -25,6 +26,37 @@ const saveStatus = ref('Salvo')
 const pageCount = ref(1)
 const contentRef = ref(null)
 let resizeObserver = null
+let applyingPageLayout = false
+let measureTimer = null
+
+const runPageLayout = () => {
+  if (!contentRef.value || applyingPageLayout || !editor.value) return
+
+  applyingPageLayout = true
+  const didSplit = layoutSectionsForPages(editor.value, contentRef.value)
+
+  const prose = contentRef.value.querySelector('.ProseMirror')
+  const height = prose?.scrollHeight ?? 0
+  pageCount.value = Math.max(1, Math.ceil(height / PAGE_CONTENT_HEIGHT))
+
+  if (didSplit) {
+    emit('update:modelValue', editor.value.getJSON())
+  }
+
+  nextTick(() => {
+    applySectionPageBreaks(contentRef.value)
+    applyingPageLayout = false
+  })
+}
+
+const updatePageCount = () => {
+  const prose = contentRef.value?.querySelector('.ProseMirror')
+  if (!prose) {
+    pageCount.value = 1
+    return
+  }
+  runPageLayout()
+}
 
 const editor = useEditor({
   content: normalizeDocumentContent(props.modelValue ?? DEFAULT_DOCUMENT_CONTENT),
@@ -57,24 +89,18 @@ const editor = useEditor({
     },
   },
   onUpdate: ({ editor: ed }) => {
+    if (applyingPageLayout) return
     saveStatus.value = 'Alterado'
     emit('update:modelValue', ed.getJSON())
     schedulePageMeasure()
   },
 })
 
-const updatePageCount = () => {
-  const prose = contentRef.value?.querySelector('.ProseMirror')
-  if (!prose) {
-    pageCount.value = 1
-    return
-  }
-  const height = prose.scrollHeight
-  pageCount.value = Math.max(1, Math.ceil(height / PAGE_CONTENT_HEIGHT))
-}
-
 const schedulePageMeasure = () => {
-  nextTick(() => updatePageCount())
+  if (measureTimer) clearTimeout(measureTimer)
+  measureTimer = setTimeout(() => {
+    nextTick(() => updatePageCount())
+  }, 120)
 }
 
 watch(
@@ -103,6 +129,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  if (measureTimer) clearTimeout(measureTimer)
   resizeObserver?.disconnect()
   editor.value?.destroy()
 })
@@ -254,8 +281,9 @@ defineExpose({
   margin: 1.25rem 0;
 }
 
-.document-prosemirror > * + * {
-  margin-top: 0;
+.document-prosemirror .section-block {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .document-prosemirror .section-block p:last-child,

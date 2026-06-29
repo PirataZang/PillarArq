@@ -49,7 +49,7 @@ export function resolveVariablesInHtml(html: string, variables: Record<string, s
 export function renderDocumentBodyHtml(content: Record<string, unknown> | null | undefined): string {
   const doc = content && typeof content === 'object' ? content : EMPTY_DOCUMENT
   const html = generateHTML(doc, createDocumentPdfExtensions())
-  return flattenSectionsForPdf(html)
+  return html.trim()
 }
 
 /** Seções são containers do editor — no PDF exportamos só o conteúdo interno */
@@ -200,6 +200,23 @@ export function wrapDocumentHtml(bodyHtml: string, title: string): string {
       color: #78716c;
       font-style: italic;
       margin: 0.75rem 0;
+    }
+
+    section[data-section-block],
+    .pdf-section {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin: 0 0 1rem;
+    }
+
+    section[data-section-block] > :first-child,
+    .pdf-section > :first-child {
+      margin-top: 0;
+    }
+
+    section[data-section-block] > :last-child,
+    .pdf-section > :last-child {
+      margin-bottom: 0;
     }
   </style>
 </head>

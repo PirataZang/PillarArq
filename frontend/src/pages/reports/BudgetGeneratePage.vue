@@ -63,6 +63,8 @@ const selectedTemplate = computed(() =>
   budgetTemplates.value.find((template) => String(template.id) === form.template_id)
 )
 
+const materialsTableVariable = '{{budget.materials_table}}'
+
 const materialsTotal = computed(() =>
   materials.value.reduce((total, item) => {
     return total + (Number(item.quantity) || 0) * (Number(item.unit_price) || 0)
@@ -514,7 +516,7 @@ const handleGenerate = async () => {
           <div class="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
             <p class="font-medium">Variável de tabela</p>
             <p class="mt-1 text-sky-800">
-              No template, use <code class="rounded bg-white/70 px-1 font-mono text-xs">{{ '{{budget.materials_table}}' }}</code>
+              No template, use <code class="rounded bg-white/70 px-1 font-mono text-xs">{{ materialsTableVariable }}</code>
               para inserir a tabela dinâmica de materiais no PDF.
             </p>
           </div>

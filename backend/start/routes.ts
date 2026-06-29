@@ -11,6 +11,7 @@ const ProjectExpensesController = () => import('#controllers/http/project_expens
 const ProjectPhasesController = () => import('#controllers/http/project_phases_controller')
 const ProjectNotesController = () => import('#controllers/http/project_notes_controller')
 const CompanySettingsController = () => import('#controllers/http/company_settings_controller')
+const DashboardController = () => import('#controllers/http/dashboard_controller')
 
 router.group(() => {
 
@@ -41,6 +42,8 @@ router.group(() => {
     router.group(() => {
       
       router.get('/permissions', [UsersController, 'permissionsList'])
+
+      router.get('/dashboard', [DashboardController, 'index'])
 
       router.get('/users', [UsersController, 'index']).use(middleware.permission(['user.list']))
       router.get('/users/:id', [UsersController, 'show']).use(middleware.permission(['user.list']))

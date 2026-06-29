@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { runOnSelection, setAlignOnSelection, isAlignActive } from './utils/toolbarActions'
 
 const props = defineProps({
   editor: { type: Object, required: true },
@@ -8,20 +9,15 @@ const props = defineProps({
 const textColor = ref('#dc2626')
 const highlightColor = ref('#fecaca')
 
-const run = (fn) => {
-  if (!props.editor) return
-  fn(props.editor.chain().focus())
-}
+const run = (fn) => runOnSelection(props.editor, fn)
 
 const setTextColor = () => run((chain) => chain.setColor(textColor.value).run())
 const setHighlight = () => run((chain) => chain.setHighlight({ color: highlightColor.value }).run())
+const setAlign = (align) => setAlignOnSelection(props.editor, align)
 </script>
 
 <template>
-  <div
-    class="flex flex-wrap items-center gap-0.5 rounded-lg border border-marble-200 bg-white px-2 py-1.5 shadow-md"
-    contenteditable="false"
-  >
+  <div class="flex flex-wrap items-center gap-0.5" contenteditable="false">
     <button
       type="button"
       class="toolbar-btn"
@@ -71,6 +67,7 @@ const setHighlight = () => run((chain) => chain.setHighlight({ color: highlightC
         v-model="textColor"
         type="color"
         class="absolute inset-0 cursor-pointer opacity-0"
+        @mousedown.prevent
         @input="setTextColor"
       />
     </label>
@@ -80,6 +77,7 @@ const setHighlight = () => run((chain) => chain.setHighlight({ color: highlightC
         v-model="highlightColor"
         type="color"
         class="absolute inset-0 cursor-pointer opacity-0"
+        @mousedown.prevent
         @input="setHighlight"
       />
     </label>
@@ -89,40 +87,40 @@ const setHighlight = () => run((chain) => chain.setHighlight({ color: highlightC
     <button
       type="button"
       class="toolbar-btn"
-      :class="{ 'is-active': editor.isActive({ textAlign: 'left' }) }"
+      :class="{ 'is-active': isAlignActive(editor, 'left') }"
       title="Alinhar à esquerda"
       @mousedown.prevent
-      @click="run((c) => c.setTextAlign('left').run())"
+      @click="setAlign('left')"
     >
       <i class="fa-solid fa-align-left text-xs" />
     </button>
     <button
       type="button"
       class="toolbar-btn"
-      :class="{ 'is-active': editor.isActive({ textAlign: 'center' }) }"
+      :class="{ 'is-active': isAlignActive(editor, 'center') }"
       title="Centralizar"
       @mousedown.prevent
-      @click="run((c) => c.setTextAlign('center').run())"
+      @click="setAlign('center')"
     >
       <i class="fa-solid fa-align-center text-xs" />
     </button>
     <button
       type="button"
       class="toolbar-btn"
-      :class="{ 'is-active': editor.isActive({ textAlign: 'right' }) }"
+      :class="{ 'is-active': isAlignActive(editor, 'right') }"
       title="Alinhar à direita"
       @mousedown.prevent
-      @click="run((c) => c.setTextAlign('right').run())"
+      @click="setAlign('right')"
     >
       <i class="fa-solid fa-align-right text-xs" />
     </button>
     <button
       type="button"
       class="toolbar-btn"
-      :class="{ 'is-active': editor.isActive({ textAlign: 'justify' }) }"
+      :class="{ 'is-active': isAlignActive(editor, 'justify') }"
       title="Justificar"
       @mousedown.prevent
-      @click="run((c) => c.setTextAlign('justify').run())"
+      @click="setAlign('justify')"
     >
       <i class="fa-solid fa-align-justify text-xs" />
     </button>

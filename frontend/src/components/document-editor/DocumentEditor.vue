@@ -1,9 +1,10 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
-import { DragHandle } from '@tiptap/extension-drag-handle-vue-3'
+import { TextSelection } from '@tiptap/pm/state'
 import DocumentEditorSidebar from './DocumentEditorSidebar.vue'
 import { createDocumentExtensions, DEFAULT_DOCUMENT_CONTENT } from './extensions'
+import { normalizeDocumentContent } from './utils/documentContent'
 import {
   A4_WIDTH_PX,
   A4_HEIGHT_PX,
@@ -25,11 +26,33 @@ const contentRef = ref(null)
 let resizeObserver = null
 
 const editor = useEditor({
-  content: props.modelValue ?? DEFAULT_DOCUMENT_CONTENT,
+  content: normalizeDocumentContent(props.modelValue ?? DEFAULT_DOCUMENT_CONTENT),
   extensions: createDocumentExtensions(),
   editorProps: {
     attributes: {
       class: 'document-prosemirror outline-none min-h-full',
+    },
+    handleClick(view, pos) {
+      const { doc } = view.state
+      const $pos = doc.resolve(pos)
+
+      for (let depth = $pos.depth; depth > 0; depth--) {
+        if ($pos.node(depth).type.name === 'sectionBlock') return false
+      }
+
+      let target = null
+      doc.descendants((node, nodePos) => {
+        if (node.type.name === 'sectionBlock' && nodePos <= pos) {
+          target = nodePos
+        }
+      })
+
+      if (target === null) return false
+
+      view.dispatch(
+        view.state.tr.setSelection(TextSelection.near(doc.resolve(target + 1))).scrollIntoView()
+      )
+      return true
     },
   },
   onUpdate: ({ editor: ed }) => {
@@ -57,10 +80,11 @@ watch(
   () => props.modelValue,
   (value) => {
     if (!editor.value || !value) return
+    const normalized = normalizeDocumentContent(value)
     const current = JSON.stringify(editor.value.getJSON())
-    const incoming = JSON.stringify(value)
+    const incoming = JSON.stringify(normalized)
     if (current !== incoming) {
-      editor.value.commands.setContent(value, false)
+      editor.value.commands.setContent(normalized, false)
       schedulePageMeasure()
     }
   }
@@ -68,6 +92,9 @@ watch(
 
 onMounted(() => {
   schedulePageMeasure()
+  nextTick(() => {
+    editor.value?.chain().focus('start').run()
+  })
   const prose = () => contentRef.value?.querySelector('.ProseMirror')
   resizeObserver = new ResizeObserver(() => updatePageCount())
   const node = prose()
@@ -150,9 +177,6 @@ defineExpose({
                   padding: `${PAGE_PADDING_PX}px`,
                 }"
               >
-                <DragHandle v-if="editor" :editor="editor">
-                  <div class="hidden" />
-                </DragHandle>
                 <EditorContent :editor="editor" />
               </div>
             </div>
@@ -168,6 +192,12 @@ defineExpose({
   color: var(--color-marble-900);
   font-size: 0.95rem;
   line-height: 1.6;
+  min-height: 200px;
+}
+
+/* Impede área editável fora das seções */
+.document-prosemirror > :not([data-section-block]):not(hr) {
+  display: none;
 }
 
 .document-prosemirror h1 {
@@ -211,8 +241,22 @@ defineExpose({
   margin: 1.25rem 0;
 }
 
-.document-prosemirror .ProseMirror-selectednode {
-  outline: none;
+.document-prosemirror > * + * {
+  margin-top: 0;
+}
+
+.document-prosemirror .section-block p:last-child,
+.document-prosemirror .section-block h1:last-child,
+.document-prosemirror .section-block h2:last-child,
+.document-prosemirror .section-block h3:last-child {
+  margin-bottom: 0;
+}
+
+.document-prosemirror .section-block p:first-child,
+.document-prosemirror .section-block h1:first-child,
+.document-prosemirror .section-block h2:first-child,
+.document-prosemirror .section-block h3:first-child {
+  margin-top: 0;
 }
 
 .document-page::after {
@@ -224,5 +268,55 @@ defineExpose({
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.35), transparent);
   pointer-events: none;
+}
+
+/* Drag ghost — seção semi-transparente seguindo o cursor */
+.section-drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.5;
+  border-radius: 0.5rem;
+  border: 2px solid #38bdf8;
+  background: rgba(224, 242, 254, 0.85);
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.18);
+  transform: rotate(-0.5deg);
+  transition: none;
+}
+
+.section-drag-ghost .section-block-toolbar-area {
+  display: none !important;
+}
+
+/* Placeholder na posição original durante o arraste */
+.section-block--source-dragging {
+  opacity: 0.2;
+  border-style: dashed !important;
+  border-color: #94a3b8 !important;
+  background: #f1f5f9 !important;
+}
+
+.section-block--source-dragging .section-block-toolbar-area {
+  visibility: hidden;
+}
+
+/* Linha indicadora de onde a seção vai cair */
+.section-drop-indicator {
+  position: fixed;
+  z-index: 9998;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #0ea5e9, transparent);
+  pointer-events: none;
+  box-shadow: 0 0 8px rgba(14, 165, 233, 0.6);
+}
+
+body.section-drag-active {
+  cursor: grabbing;
+  user-select: none;
+}
+
+body.section-drag-active .ProseMirror {
+  caret-color: transparent;
 }
 </style>

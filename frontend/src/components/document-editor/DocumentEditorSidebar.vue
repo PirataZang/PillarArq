@@ -1,16 +1,17 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, unref } from 'vue'
 import { TEMPLATE_VARIABLES } from './constants/variables'
+import { insertInActiveSection } from './utils/documentContent'
 
 const props = defineProps({
   editor: { type: Object, default: null },
 })
 
-const emit = defineEmits(['insert-block'])
-
 const activeTab = ref('variables')
 const search = ref('')
 const openGroups = ref(TEMPLATE_VARIABLES.map((g) => g.id))
+
+const editorInstance = computed(() => unref(props.editor))
 
 const filteredGroups = computed(() => {
   const term = search.value.trim().toLowerCase()
@@ -34,49 +35,54 @@ const toggleGroup = (groupId) => {
 }
 
 const insertVariable = (item) => {
-  props.editor?.chain().focus().insertTemplateVariable({ key: item.key, label: item.label }).run()
+  const ed = editorInstance.value
+  if (!ed) return
+  ed.chain().focus().insertTemplateVariable({ key: item.key, label: item.label }).run()
+}
+
+const insertAtDocEnd = (content) => {
+  const ed = editorInstance.value
+  if (!ed) return
+  const end = ed.state.doc.content.size
+  ed.chain().insertContentAt(end, content).focus(end + 1).run()
 }
 
 const formatVariable = (key) => `{{${key}}}`
 
 const blocks = [
   {
-    id: 'paragraph',
-    label: 'Parágrafo',
-    icon: 'fa-paragraph',
-    action: () => props.editor?.chain().focus().insertSectionBlock([{ type: 'paragraph' }]).run(),
+    id: 'section',
+    label: 'Seção',
+    icon: 'fa-layer-group',
+    action: () => editorInstance.value?.chain().focus().insertSectionBlock().run(),
   },
   {
     id: 'h1',
     label: 'Título H1',
     icon: 'fa-heading',
     action: () =>
-      props.editor
-        ?.chain()
-        .focus()
-        .insertSectionBlock([
-          { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Novo título' }] },
-        ])
-        .run(),
+      insertInActiveSection(editorInstance.value, {
+        type: 'heading',
+        attrs: { level: 1 },
+        content: [{ type: 'text', text: 'Novo título' }],
+      }),
   },
   {
     id: 'h2',
     label: 'Título H2',
     icon: 'fa-heading',
     action: () =>
-      props.editor
-        ?.chain()
-        .focus()
-        .insertSectionBlock([
-          { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Subtítulo' }] },
-        ])
-        .run(),
+      insertInActiveSection(editorInstance.value, {
+        type: 'heading',
+        attrs: { level: 2 },
+        content: [{ type: 'text', text: 'Subtítulo' }],
+      }),
   },
   {
     id: 'separator',
     label: 'Separador',
     icon: 'fa-minus',
-    action: () => props.editor?.chain().focus().setHorizontalRule().run(),
+    action: () => insertAtDocEnd({ type: 'horizontalRule' }),
   },
 ]
 </script>
@@ -143,7 +149,9 @@ const blocks = [
     </div>
 
     <div v-else class="flex-1 overflow-y-auto p-3">
-      <p class="mb-3 text-xs text-marble-500">Clique para adicionar ao documento:</p>
+      <p class="mb-3 text-xs text-marble-500">
+        Todo o conteúdo fica dentro das <strong>seções</strong> (caixas azuis). Use <strong>Seção</strong> para adicionar um novo bloco.
+      </p>
       <div class="space-y-2">
         <button
           v-for="block in blocks"

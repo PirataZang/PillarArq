@@ -153,6 +153,12 @@ const blocks = [
             >
               <span class="text-sm text-marble-800">{{ item.label }}</span>
               <span class="font-mono text-xs text-sky-600">{{ formatVariable(item.key) }}</span>
+              <span
+                v-if="item.key === 'budget.materials_table'"
+                class="mt-1 inline-flex w-fit rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700"
+              >
+                Tabela dinâmica
+              </span>
             </button>
           </div>
         </div>

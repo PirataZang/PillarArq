@@ -26,6 +26,15 @@ function parseBudgetData(input: Record<string, unknown> | undefined): BudgetVari
     adjustment_index: input.adjustment_index as string | undefined,
     adjustment_index_other: input.adjustment_index_other as string | undefined,
     complexity: input.complexity as string | undefined,
+    materials: Array.isArray(input.materials)
+      ? (input.materials as Record<string, unknown>[]).map((item) => ({
+          name: String(item.name ?? ''),
+          quantity: item.quantity as string | number,
+          unit: String(item.unit ?? 'un'),
+          unit_price: item.unit_price as string | number,
+          supplier: (item.supplier as string | null | undefined) ?? null,
+        }))
+      : undefined,
   }
 }
 

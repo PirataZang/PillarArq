@@ -1,5 +1,6 @@
 import { generateHTML } from '@tiptap/html'
 import { createDocumentPdfExtensions } from '#utils/document_tiptap_extensions'
+import { BUDGET_HTML_VARIABLE_KEYS } from '#utils/budget_materials_table'
 
 const EMPTY_DOCUMENT = {
   type: 'doc',
@@ -20,11 +21,26 @@ function escapeHtml(text: string): string {
 }
 
 export function resolveVariablesInHtml(html: string, variables: Record<string, string>): string {
-  return html.replace(/\{\{([^}]+)\}\}/g, (_match, key: string) => {
+  let result = html
+
+  for (const key of BUDGET_HTML_VARIABLE_KEYS) {
+    const value = variables[key]
+    if (!value) continue
+    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    result = result.replace(
+      new RegExp(`<span[^>]*>\\s*\\{\\{${escapedKey}\\}\\}\\s*</span>`, 'gi'),
+      value
+    )
+  }
+
+  return result.replace(/\{\{([^}]+)\}\}/g, (_match, key: string) => {
     const trimmed = key.trim()
     const value = variables[trimmed]
     if (value === undefined || value === null || value === '') {
       return `<span class="template-variable-missing">{{${trimmed}}}</span>`
+    }
+    if (BUDGET_HTML_VARIABLE_KEYS.has(trimmed)) {
+      return value
     }
     return escapeHtml(value)
   })
@@ -142,6 +158,48 @@ export function wrapDocumentHtml(bodyHtml: string, title: string): string {
     mark {
       border-radius: 2px;
       padding: 0 2px;
+    }
+
+    .budget-materials-table-wrap {
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+
+    .budget-materials-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10pt;
+    }
+
+    .budget-materials-table th,
+    .budget-materials-table td {
+      border: 1px solid #d6d3d1;
+      padding: 0.45rem 0.55rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .budget-materials-table th {
+      background: #f5f5f4;
+      font-weight: 600;
+      color: #44403c;
+    }
+
+    .budget-materials-table td.num,
+    .budget-materials-table th.num {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .budget-materials-table tfoot td {
+      background: #fafaf9;
+      border-top: 2px solid #a8a29e;
+    }
+
+    .budget-table-empty {
+      color: #78716c;
+      font-style: italic;
+      margin: 0.75rem 0;
     }
   </style>
 </head>

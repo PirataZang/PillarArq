@@ -1,4 +1,9 @@
 import { DateTime } from 'luxon'
+import {
+  buildMaterialsTableHtml,
+  calculateMaterialsTotal,
+  type BudgetMaterialInput,
+} from '#utils/budget_materials_table'
 
 const WORK_TYPE_LABELS: Record<string, string> = {
   RESIDENCIAL: 'Residencial',
@@ -50,6 +55,14 @@ export interface BudgetVariableInput {
   adjustment_index?: string | null
   adjustment_index_other?: string | null
   complexity?: string | null
+  materials?: BudgetMaterialInput[]
+}
+
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value)
 }
 
 function formatArea(value: number | string | null | undefined): string {
@@ -96,5 +109,8 @@ export function buildBudgetVariables(data: BudgetVariableInput = {}): Record<str
     'budget.adjustment_index': adjustmentIndex,
     'budget.complexity': labelFor(COMPLEXITY_LABELS, data.complexity),
     'budget.generated_at': DateTime.now().toFormat('dd/MM/yyyy'),
+    'budget.materials_table': buildMaterialsTableHtml(data.materials ?? []),
+    'budget.materials_total': formatCurrency(calculateMaterialsTotal(data.materials ?? [])),
+    'budget.materials_count': String(data.materials?.length ?? 0),
   }
 }

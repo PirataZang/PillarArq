@@ -94,6 +94,15 @@ export const BUDGET_TEMPLATE_VARIABLES: TemplateVariableGroup[] = [
       { key: 'budget.generated_at', label: 'Data de Emissão' },
     ],
   },
+  {
+    id: 'budget_materials',
+    label: 'Materiais',
+    items: [
+      { key: 'budget.materials_table', label: 'Tabela de Materiais' },
+      { key: 'budget.materials_total', label: 'Total de Materiais' },
+      { key: 'budget.materials_count', label: 'Quantidade de Itens' },
+    ],
+  },
 ]
 
 export function getTemplateVariablesByType(documentType: DocumentType = 'GERAL'): TemplateVariableGroup[] {

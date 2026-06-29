@@ -49,7 +49,15 @@ export const DEFAULT_BUDGET_DOCUMENT_CONTENT = {
       paragraph(text('Índice de reajuste: '), v('budget.adjustment_index', 'Índice de Reajuste'))
     ),
     section(
-      heading(2, '4. Composição do Orçamento'),
+      heading(2, '4. Materiais do Orçamento'),
+      paragraph(
+        text('Relação de materiais previstos como base para composição do orçamento:')
+      ),
+      paragraph(v('budget.materials_table', 'Tabela de Materiais')),
+      paragraph(text('Total de materiais: '), v('budget.materials_total', 'Total de Materiais'))
+    ),
+    section(
+      heading(2, '5. Composição do Orçamento'),
       paragraph(
         text(
           'Utilize esta seção para detalhar composições, quantitativos, custos unitários, BDI, encargos sociais e demais itens do orçamento conforme a metodologia da empresa.'
@@ -57,7 +65,7 @@ export const DEFAULT_BUDGET_DOCUMENT_CONTENT = {
       )
     ),
     section(
-      heading(2, '5. Condições Gerais'),
+      heading(2, '6. Condições Gerais'),
       paragraph(
         text(
           'Inclua aqui validade da proposta, condições de pagamento, garantias, exclusões, premissas adotadas e observações técnicas relevantes para a execução da obra.'

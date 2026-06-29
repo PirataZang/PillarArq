@@ -1,19 +1,30 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ProjectService from '#services/project_service'
-import { createProjectValidator, updateProjectValidator } from '#validators/project_validator'
+import { createProjectValidator, updateProjectValidator, listProjectsValidator } from '#validators/project_validator'
+import type { ProjectListFilters } from '#models/project'
 import User from '#models/user'
 
 export default class ProjectsController {
   private projectService = new ProjectService()
 
-  async index({ auth, response }: HttpContext) {
+  async index({ auth, request, response }: HttpContext) {
     const companyId = (auth.user as User).companyId
-    const projects = await this.projectService.index(companyId)
+    const filters = await request.validateUsing(listProjectsValidator)
+    const archived = request.input('archived') === true || request.input('archived') === 'true'
+
+    const projects = await this.projectService.index(companyId, {
+      ...(filters as ProjectListFilters),
+      archived,
+    })
 
     return response.ok({
       success: true,
       message: 'Projects listed successfully',
       data: projects,
+      meta: {
+        total: projects.length,
+        archived,
+      },
     })
   }
 

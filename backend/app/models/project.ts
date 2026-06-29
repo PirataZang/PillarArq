@@ -9,6 +9,9 @@ import ProjectMaterial from './project_material.js'
 import ProjectExpense from './project_expense.js'
 import ProjectPhase from './project_phase.js'
 import ProjectNote from './project_note.js'
+import { applyProjectScopes, type ProjectListFilters } from './scopes/project_scopes.js'
+
+export type { ProjectListFilters }
 
 export default class Project extends BaseModel {
   @column({ isPrimary: true })
@@ -88,4 +91,20 @@ export default class Project extends BaseModel {
 
   @hasMany(() => ProjectNote)
   declare notes: HasMany<typeof ProjectNote>
+
+  static scopeList(companyId: string, filters: ProjectListFilters = {}) {
+    const query = this.query()
+    return applyProjectScopes(query, companyId, filters)
+  }
+
+  static scopeActive(companyId: string) {
+    return this.query()
+      .where('companyId', companyId)
+      .whereNull('deletedAt')
+      .whereNot('status', 'ARCHIVED')
+  }
+
+  static scopeArchived(companyId: string) {
+    return this.query().where('companyId', companyId).where('status', 'ARCHIVED')
+  }
 }

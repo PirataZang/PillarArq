@@ -86,3 +86,18 @@ export const createProjectNoteValidator = vine.compile(
     content: vine.string().trim().minLength(1),
   })
 )
+
+export const listProjectsValidator = vine.compile(
+  vine.object({
+    search: vine.string().trim().optional(),
+    status: vine.enum(PROJECT_STATUSES).optional(),
+    client_id: vine.string().trim().optional(),
+    assigned_user_id: vine.string().trim().optional(),
+    start_date_from: sqlDate().optional(),
+    start_date_to: sqlDate().optional(),
+    expected_end_date_from: sqlDate().optional(),
+    expected_end_date_to: sqlDate().optional(),
+    progress_min: vine.number().min(0).max(100).optional(),
+    progress_max: vine.number().min(0).max(100).optional(),
+  })
+)

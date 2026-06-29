@@ -6,6 +6,7 @@ import LimitException from '#exceptions/limit_exception'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
 import type { createProjectValidator, updateProjectValidator } from '#validators/project_validator'
+import type { ProjectListFilters } from '#models/project'
 import { DEFAULT_PROJECT_STATUS } from '#constants/project_status'
 import { resolveProjectPhaseSeeds } from '#utils/company_phase_templates'
 import {
@@ -18,14 +19,14 @@ type CreateProjectPayload = Infer<typeof createProjectValidator>
 type UpdateProjectPayload = Infer<typeof updateProjectValidator>
 
 export default class ProjectService {
-  private baseQuery(companyId: string) {
+  private activeQuery(companyId: string) {
     return Project.query()
       .where('companyId', companyId)
       .whereNull('deletedAt')
   }
 
   private async findProjectOrFail(companyId: string, projectId: string) {
-    return this.baseQuery(companyId).where('id', projectId).firstOrFail()
+    return Project.query().where('companyId', companyId).where('id', projectId).firstOrFail()
   }
 
   private async loadProjectDetails(project: Project) {
@@ -52,21 +53,28 @@ export default class ProjectService {
     }
   }
 
-  async index(companyId: string) {
-    const projects = await this.baseQuery(companyId)
+  private serializeProjectListItem(project: Project) {
+    const serialized = project.serialize()
+
+    return {
+      id: serialized.id,
+      name: serialized.name,
+      status: serialized.status,
+      area_m2: serialized.area_m2,
+      progress_percent: project.progressPercent,
+      start_date: serialized.start_date,
+      expected_end_date: serialized.expected_end_date,
+      client: serialized.client,
+      updated_at: serialized.updated_at,
+    }
+  }
+
+  async index(companyId: string, filters: ProjectListFilters = {}) {
+    const projects = await Project.scopeList(companyId, filters)
       .preload('client')
       .orderBy('updatedAt', 'desc')
 
-    const enriched = []
-
-    for (const project of projects) {
-      await project.load('materials')
-      await project.load('expenses')
-      await project.load('phases')
-      enriched.push(this.serializeProject(project))
-    }
-
-    return enriched
+    return projects.map((project) => this.serializeProjectListItem(project))
   }
 
   async show(companyId: string, projectId: string) {
@@ -196,7 +204,7 @@ export default class ProjectService {
   }
 
   async destroy(companyId: string, projectId: string, userId?: string) {
-    const project = await this.findProjectOrFail(companyId, projectId)
+    const project = await this.activeQuery(companyId).where('id', projectId).firstOrFail()
     project.status = 'ARCHIVED'
     project.deletedAt = DateTime.now()
     project.updatedBy = userId ?? null

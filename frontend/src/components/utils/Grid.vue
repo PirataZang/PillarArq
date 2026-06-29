@@ -1,6 +1,6 @@
 <template>
     <div class="grid-wrapper ag-theme-quartz">
-        <AgGridVue class="grid" theme="legacy" :rowData="rowData" :columnDefs="columnDefs" :columnTypes="columnTypes" :defaultColDef="defaultColDef" :localeText="localeText" :rowSelection="rowSelection" @grid-ready="onGridReady" @selection-changed="onSelectionChanged" />
+        <AgGridVue class="grid" theme="legacy" :rowData="rowData" :columnDefs="columnDefs" :columnTypes="columnTypes" :defaultColDef="defaultColDef" :localeText="localeText" :rowSelection="rowSelectionConfig" :context="context" @grid-ready="onGridReady" @selection-changed="onSelectionChanged" @row-clicked="onRowClicked" />
         
         <!-- Painel de Paginação Premium Customizado -->
         <div class="custom-pagination">
@@ -66,13 +66,16 @@ const props = defineProps({
     defaultColDef: { type: Object, default: () => ({ sortable: true, filter: true, floatingFilter: false, resizable: true }) },
     currentPage: { type: Number, default: 1 },
     pageSize: { type: Number, default: 50 },
-    totalRows: { type: Number, default: 0 }
+    totalRows: { type: Number, default: 0 },
+    selectable: { type: Boolean, default: true },
+    gridHeight: { type: String, default: '80vh' },
+    context: { type: Object, default: () => ({}) },
 })
 
 /* ===============================
    EMITS
 ================================ */
-const emit = defineEmits(['update:selection', 'update:page', 'update:pageSize'])
+const emit = defineEmits(['update:selection', 'update:page', 'update:pageSize', 'row-click'])
 
 /* ===============================
    GRID API
@@ -84,19 +87,23 @@ const onGridReady = (params) => {
 }
 
 const onSelectionChanged = () => {
-    if (!gridApi.value) return
+    if (!gridApi.value || !props.selectable) return
     const selectedData = gridApi.value.getSelectedNodes().map((node) => node.data)
     emit('update:selection', selectedData)
 }
 
-/* ===============================
-   CONFIGS
-================================ */
-const rowSelection = {
-    mode: 'multiRow',
-    checkboxes: true,
-    headerCheckbox: true,
+const onRowClicked = (event) => {
+    emit('row-click', event.data)
 }
+
+const rowSelectionConfig = computed(() => {
+    if (!props.selectable) return undefined
+    return {
+        mode: 'multiRow',
+        checkboxes: true,
+        headerCheckbox: true,
+    }
+})
 
 const localeText = {
     page: 'Página',
@@ -193,7 +200,7 @@ const changePageSize = (event) => {
 <style scoped>
 .grid-wrapper {
     width: 100%;
-    height: 80vh;
+    height: v-bind(gridHeight);
     display: flex;
     flex-direction: column;
 }
@@ -202,6 +209,14 @@ const changePageSize = (event) => {
     width: 100%;
     flex: 1;
     min-height: 0;
+}
+
+.grid-wrapper .grid :deep(.ag-row) {
+    cursor: pointer;
+}
+
+.grid-wrapper .grid :deep(.ag-row:hover) {
+    background-color: #faf9f7;
 }
 
 .grid-wrapper .grid :deep(.cell-center) {

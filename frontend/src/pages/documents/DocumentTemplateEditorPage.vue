@@ -6,6 +6,7 @@ import Select from '@/components/utils/Select.vue'
 import Input from '@/components/utils/Input.vue'
 import { DEFAULT_DOCUMENT_CONTENT } from '@/components/document-editor/extensions'
 import { useSwal } from '@/utils/swal'
+import { downloadDocumentPdf } from '@/utils/documentPdf'
 import api from '@/services/api'
 
 const route = useRoute()
@@ -14,6 +15,7 @@ const swal = useSwal()
 
 const loading = ref(true)
 const saving = ref(false)
+const downloading = ref(false)
 const templateName = ref('Novo Template')
 const content = ref(DEFAULT_DOCUMENT_CONTENT)
 const clientId = ref('')
@@ -95,7 +97,29 @@ const handleSave = async (json) => {
 }
 
 const handlePreview = () => {
-  swal.info('Preview', 'A visualização com dados reais será implementada no backend.')
+  swal.info('Preview', 'A visualização em tela será implementada em breve. Use Baixar PDF para ver o resultado.')
+}
+
+const handleDownload = async (json) => {
+  if (!templateName.value.trim()) {
+    swal.error('Atenção', 'Informe o nome do template antes de baixar o PDF.')
+    return
+  }
+
+  downloading.value = true
+  try {
+    await downloadDocumentPdf({
+      templateId: isEdit() ? route.params.id : undefined,
+      name: templateName.value.trim(),
+      content: json ?? content.value,
+      clientId: clientId.value || undefined,
+    })
+    swal.success('PDF gerado com sucesso!')
+  } catch {
+    swal.error('Erro', 'Não foi possível gerar o PDF. Verifique se o serviço Gotenberg está em execução.')
+  } finally {
+    downloading.value = false
+  }
 }
 </script>
 
@@ -120,6 +144,7 @@ const handlePreview = () => {
         :title="templateName"
         @save="handleSave"
         @preview="handlePreview"
+        @download="handleDownload"
       />
     </div>
   </div>

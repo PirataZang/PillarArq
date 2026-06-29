@@ -36,8 +36,8 @@ export default class DocumentTemplateService {
       client_id: template.clientId,
       client_name: template.client?.name ?? null,
       content: template.content,
-      created_at: template.createdAt,
-      updated_at: template.updatedAt,
+      created_at: template.createdAt?.toISO?.() ?? template.createdAt,
+      updated_at: template.updatedAt?.toISO?.() ?? template.updatedAt,
     }))
   }
 
@@ -55,8 +55,8 @@ export default class DocumentTemplateService {
       client_id: template.clientId,
       client_name: template.client?.name ?? null,
       content: template.content,
-      created_at: template.createdAt,
-      updated_at: template.updatedAt,
+      created_at: template.createdAt?.toISO?.() ?? template.createdAt,
+      updated_at: template.updatedAt?.toISO?.() ?? template.updatedAt,
     }
   }
 

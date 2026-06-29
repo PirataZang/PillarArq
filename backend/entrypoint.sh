@@ -36,6 +36,13 @@ if [ ! -d "node_modules/typescript" ]; then
   npm install --legacy-peer-deps
 fi
 
+# Bindings nativos do @swc/core quebram ao trocar a imagem Docker (alpine <-> debian)
+if ! node -e "require('@swc/core')" >/dev/null 2>&1; then
+  echo "Bindings do @swc/core incompatíveis. Reinstalando dependências..."
+  find node_modules -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
+  npm install --legacy-peer-deps
+fi
+
 echo "Iniciando a aplicação..."
 # Executa o CMD passado no Dockerfile ou docker-compose.yml
 exec "$@"

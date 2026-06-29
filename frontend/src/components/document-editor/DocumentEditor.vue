@@ -18,7 +18,7 @@ const props = defineProps({
   title: { type: String, default: 'Novo Template' },
 })
 
-const emit = defineEmits(['update:modelValue', 'save', 'preview'])
+const emit = defineEmits(['update:modelValue', 'save', 'preview', 'download'])
 
 const saveStatus = ref('Salvo')
 const pageCount = ref(1)
@@ -117,6 +117,11 @@ const handlePreview = () => {
   emit('preview', editor.value.getJSON())
 }
 
+const handleDownload = () => {
+  if (!editor.value) return
+  emit('download', editor.value.getJSON())
+}
+
 defineExpose({
   getJSON: () => editor.value?.getJSON(),
   getHTML: () => editor.value?.getHTML(),
@@ -137,6 +142,13 @@ defineExpose({
           @click="handlePreview"
         >
           Preview
+        </button>
+        <button
+          type="button"
+          class="rounded-lg border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-700 hover:bg-sky-100"
+          @click="handleDownload"
+        >
+          Baixar PDF
         </button>
         <button
           type="button"

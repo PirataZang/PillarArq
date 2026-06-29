@@ -123,4 +123,41 @@ export default class DocumentTemplatesController {
       data: TEMPLATE_VARIABLES,
     })
   }
+
+  async downloadPdf({ auth, params, request, response }: HttpContext) {
+    const user = auth.user as User
+    const { default: DocumentTemplatePdfService } = await import(
+      '#services/document_template_pdf_service'
+    )
+    const pdfService = new DocumentTemplatePdfService()
+    const { buffer, filename } = await pdfService.generate(user.companyId, user.id, {
+      templateId: params.id,
+      clientId: request.input('client_id'),
+      projectId: request.input('project_id'),
+    })
+
+    response.header('Content-Type', 'application/pdf')
+    response.header('Content-Disposition', `attachment; filename="${filename}"`)
+    return response.send(buffer)
+  }
+
+  async generatePdf({ auth, request, response }: HttpContext) {
+    const user = auth.user as User
+    const payload = request.only(['name', 'content', 'client_id', 'project_id', 'template_id'])
+    const { default: DocumentTemplatePdfService } = await import(
+      '#services/document_template_pdf_service'
+    )
+    const pdfService = new DocumentTemplatePdfService()
+    const { buffer, filename } = await pdfService.generate(user.companyId, user.id, {
+      templateId: payload.template_id,
+      name: payload.name,
+      content: payload.content,
+      clientId: payload.client_id,
+      projectId: payload.project_id,
+    })
+
+    response.header('Content-Type', 'application/pdf')
+    response.header('Content-Disposition', `attachment; filename="${filename}"`)
+    return response.send(buffer)
+  }
 }

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import Button from '@/components/utils/Button.vue'
 import Grid from '@/components/utils/Grid.vue'
 import { useSwal } from '@/utils/swal'
+import { downloadDocumentPdf } from '@/utils/documentPdf'
 import api from '@/services/api'
 
 const router = useRouter()
@@ -12,6 +13,7 @@ const swal = useSwal()
 const templates = ref([])
 const clients = ref([])
 const selected = ref([])
+const downloading = ref(false)
 
 const columnDefs = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -61,6 +63,25 @@ const goToEdit = () => {
   }
 }
 
+const downloadSelected = async () => {
+  if (selected.value.length !== 1) return
+  const item = selected.value[0]
+
+  downloading.value = true
+  try {
+    await downloadDocumentPdf({
+      templateId: item.id,
+      name: item.name,
+      clientId: item.client_id || undefined,
+    })
+    swal.success('PDF baixado com sucesso!')
+  } catch {
+    swal.error('Erro', 'Não foi possível gerar o PDF.')
+  } finally {
+    downloading.value = false
+  }
+}
+
 const confirmDelete = async () => {
   if (!selected.value.length) return
   const confirmed = await swal.confirm(
@@ -94,6 +115,13 @@ const confirmDelete = async () => {
       <div class="mt-4 flex gap-2 sm:mt-0">
         <Button variant="secondary" :disabled="selected.length !== 1" @click="goToEdit">
           Editar
+        </Button>
+        <Button
+          variant="secondary"
+          :disabled="selected.length !== 1 || downloading"
+          @click="downloadSelected"
+        >
+          Baixar PDF
         </Button>
         <Button variant="danger" :disabled="!selected.length" @click="confirmDelete">
           Excluir

@@ -89,7 +89,9 @@ router.group(() => {
       router.delete('/settings/phase-templates/:id', [CompanySettingsController, 'destroyPhaseTemplate'])
 
       router.get('/document-templates/variables', [DocumentTemplatesController, 'variables'])
+      router.post('/document-templates/pdf', [DocumentTemplatesController, 'generatePdf'])
       router.get('/document-templates', [DocumentTemplatesController, 'index'])
+      router.get('/document-templates/:id/pdf', [DocumentTemplatesController, 'downloadPdf'])
       router.get('/document-templates/:id', [DocumentTemplatesController, 'show'])
       router.post('/document-templates', [DocumentTemplatesController, 'store'])
       router.put('/document-templates/:id', [DocumentTemplatesController, 'update'])

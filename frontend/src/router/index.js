@@ -18,6 +18,8 @@ import ComponentsTestPage from '@/pages/ComponentsTest.vue'
 import CompanyListPage from '@/pages/companies/CompanyListPage.vue'
 import CompanyFormPage from '@/pages/companies/CompanyFormPage.vue'
 import SettingsPage from '@/pages/settings/SettingsPage.vue'
+import DocumentTemplateListPage from '@/pages/documents/DocumentTemplateListPage.vue'
+import DocumentTemplateEditorPage from '@/pages/documents/DocumentTemplateEditorPage.vue'
 
 const routes = [
   {
@@ -131,6 +133,24 @@ const routes = [
         name: 'settings',
         component: SettingsPage,
         meta: { title: 'Configurações' },
+      },
+      {
+        path: 'documents',
+        name: 'documents.list',
+        component: DocumentTemplateListPage,
+        meta: { title: 'Documentos' },
+      },
+      {
+        path: 'documents/create',
+        name: 'documents.create',
+        component: DocumentTemplateEditorPage,
+        meta: { title: 'Documentos', fullWidth: true },
+      },
+      {
+        path: 'documents/:id/edit',
+        name: 'documents.edit',
+        component: DocumentTemplateEditorPage,
+        meta: { title: 'Documentos', fullWidth: true },
       },
     ],
   },

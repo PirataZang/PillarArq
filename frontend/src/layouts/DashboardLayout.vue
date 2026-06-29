@@ -22,7 +22,10 @@ const toggleSidebar = () => {
 
       <!-- Main Scrollable Area -->
       <main class="flex-1 relative z-0 overflow-y-auto focus:outline-none">
-        <div class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div
+          class="py-6 px-4 sm:px-6 lg:px-8 mx-auto"
+          :class="$route.meta.fullWidth ? 'max-w-none' : 'max-w-7xl'"
+        >
           <router-view />
         </div>
       </main>

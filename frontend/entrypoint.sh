@@ -34,8 +34,8 @@ if [ ! -f "package.json" ]; then
   echo "=========================================="
 fi
 
-# Volume anônimo pode criar node_modules vazio; verifica pacote real
-if [ ! -d "node_modules/vite" ]; then
+# Volume anônimo pode manter node_modules desatualizado após mudanças no package.json
+if [ ! -d "node_modules/vite" ] || [ ! -f "node_modules/.package-lock.json" ] || ! cmp -s package-lock.json node_modules/.package-lock.json 2>/dev/null; then
   echo "Instalando dependências do projeto..."
   npm install
 fi

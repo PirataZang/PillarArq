@@ -86,6 +86,31 @@ export class CompanyPhaseTemplateSchema extends BaseModel {
   declare weightPercent: number
 }
 
+export class DocumentTemplateSchema extends BaseModel {
+  static $columns = ['clientId', 'companyId', 'content', 'createdAt', 'createdBy', 'deletedAt', 'id', 'name', 'updatedAt', 'updatedBy'] as const
+  $columns = DocumentTemplateSchema.$columns
+  @column()
+  declare clientId: bigint | number | null
+  @column()
+  declare companyId: bigint | number
+  @column()
+  declare content: any
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdBy: bigint | number | null
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare name: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare updatedBy: bigint | number | null
+}
+
 export class ProjectExpenseSchema extends BaseModel {
   static $columns = ['amount', 'category', 'companyId', 'createdAt', 'description', 'expenseDate', 'id', 'projectId', 'updatedAt'] as const
   $columns = ProjectExpenseSchema.$columns

@@ -32,6 +32,7 @@ const navigation = ref([
   { id: 'dashboard', name: 'Dashboard', href: '/dashboard', icon: 'fa-solid fa-chart-pie' },
   { id: 'projects', name: 'Obras', href: '/projects', icon: 'fa-solid fa-building', permission: 'projects.list' },
   { id: 'clients', name: 'Clientes', href: '/clients', icon: 'fa-solid fa-user-tie' },
+  { id: 'documents', name: 'Documentos', href: '/documents', icon: 'fa-solid fa-file-lines' },
   { id: 'users', name: 'Usuários', href: '/users', icon: 'fa-solid fa-users', permission: 'user.list' },
   { id: 'settings', name: 'Configurações', href: '/settings', icon: 'fa-solid fa-gear' },
   {

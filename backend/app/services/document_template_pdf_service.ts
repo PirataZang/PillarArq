@@ -5,6 +5,7 @@ import {
   buildDocumentVariableContext,
   type DocumentVariableContextOptions,
 } from '#utils/document_variable_resolver'
+import type { BudgetVariableInput } from '#utils/budget_variables'
 
 function sanitizeFilename(name: string): string {
   const cleaned = name
@@ -19,6 +20,7 @@ function sanitizeFilename(name: string): string {
 export interface GeneratePdfOptions extends DocumentVariableContextOptions {
   content?: Record<string, unknown> | null
   name?: string
+  budgetData?: BudgetVariableInput | null
 }
 
 export default class DocumentTemplatePdfService {
@@ -57,6 +59,7 @@ export default class DocumentTemplatePdfService {
     const variables = await buildDocumentVariableContext(companyId, userId, {
       clientId,
       projectId,
+      budgetData: options.budgetData,
     })
 
     const html = renderDocumentHtml(content, variables, name)

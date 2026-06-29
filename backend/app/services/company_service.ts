@@ -3,6 +3,7 @@ import type { Infer } from '@vinejs/vine/types'
 import type { createCompanyValidator, updateCompanyValidator } from '#validators/company_validator'
 import { DateTime } from 'luxon'
 import { seedDefaultPhaseTemplates } from '#utils/company_phase_templates'
+import { seedDefaultBudgetTemplate } from '#utils/default_budget_template'
 
 type CreateCompanyPayload = Infer<typeof createCompanyValidator>
 type UpdateCompanyPayload = Infer<typeof updateCompanyValidator>
@@ -26,6 +27,7 @@ export default class CompanyService {
     })
 
     await seedDefaultPhaseTemplates(company.id)
+    await seedDefaultBudgetTemplate(company.id)
 
     return company
   }

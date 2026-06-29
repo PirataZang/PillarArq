@@ -33,6 +33,7 @@ export default class DocumentTemplateService {
     return templates.map((template) => ({
       id: template.id,
       name: template.name,
+      document_type: template.documentType,
       client_id: template.clientId,
       client_name: template.client?.name ?? null,
       content: template.content,
@@ -52,6 +53,7 @@ export default class DocumentTemplateService {
     return {
       id: template.id,
       name: template.name,
+      document_type: template.documentType,
       client_id: template.clientId,
       client_name: template.client?.name ?? null,
       content: template.content,
@@ -67,6 +69,7 @@ export default class DocumentTemplateService {
       companyId,
       clientId: clientId ? String(clientId) : null,
       name: payload.name,
+      documentType: payload.document_type ?? 'GERAL',
       content: payload.content as Record<string, unknown>,
       createdBy: userId ?? null,
     })
@@ -86,6 +89,7 @@ export default class DocumentTemplateService {
 
     template.merge({
       ...(payload.name !== undefined ? { name: payload.name } : {}),
+      ...(payload.document_type !== undefined ? { documentType: payload.document_type } : {}),
       ...(payload.content !== undefined ? { content: payload.content as Record<string, unknown> } : {}),
       updatedBy: userId ?? null,
     })

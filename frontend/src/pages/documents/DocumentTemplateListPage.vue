@@ -19,6 +19,12 @@ const columnDefs = [
   { field: 'id', headerName: 'ID', width: 90 },
   { field: 'name', headerName: 'Nome', flex: 1 },
   {
+    field: 'document_type',
+    headerName: 'Tipo',
+    width: 130,
+    valueFormatter: (p) => (p.value === 'ORCAMENTO' ? 'Orçamento' : 'Geral'),
+  },
+  {
     field: 'client_name',
     headerName: 'Cliente',
     flex: 1,

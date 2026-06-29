@@ -4,58 +4,30 @@ import {
   createDocumentTemplateValidator,
   updateDocumentTemplateValidator,
 } from '#validators/document_template_validator'
+import { getTemplateVariablesByType } from '#constants/document_template_variables'
+import type { DocumentType } from '#constants/document_type'
+import type { BudgetVariableInput } from '#utils/budget_variables'
 import User from '#models/user'
 
-const TEMPLATE_VARIABLES = [
-  {
-    id: 'company',
-    label: 'Empresa',
-    items: [
-      { key: 'company.name', label: 'Nome da Empresa' },
-      { key: 'company.document', label: 'CNPJ' },
-      { key: 'company.address', label: 'Endereço' },
-    ],
-  },
-  {
-    id: 'user',
-    label: 'Usuário',
-    items: [
-      { key: 'user.name', label: 'Nome do Usuário' },
-      { key: 'user.email', label: 'E-mail do Usuário' },
-      { key: 'user.phone', label: 'Telefone' },
-    ],
-  },
-  {
-    id: 'client',
-    label: 'Cliente',
-    items: [
-      { key: 'client.name', label: 'Nome do Cliente' },
-      { key: 'client.email', label: 'E-mail do Cliente' },
-      { key: 'client.phone', label: 'Telefone do Cliente' },
-      { key: 'client.document', label: 'Documento' },
-      { key: 'client.address', label: 'Endereço' },
-    ],
-  },
-  {
-    id: 'project',
-    label: 'Obra',
-    items: [
-      { key: 'project.name', label: 'Nome da Obra' },
-      { key: 'project.address', label: 'Endereço da Obra' },
-      { key: 'project.status', label: 'Status' },
-      { key: 'project.total_budget', label: 'Orçamento Total' },
-      { key: 'project.start_date', label: 'Data de Início' },
-    ],
-  },
-  {
-    id: 'proposal',
-    label: 'Proposta',
-    items: [
-      { key: 'proposal.total', label: 'Valor Total' },
-      { key: 'proposal.date', label: 'Data de Emissão' },
-    ],
-  },
-]
+function parseBudgetData(input: Record<string, unknown> | undefined): BudgetVariableInput | null {
+  if (!input || typeof input !== 'object') return null
+
+  return {
+    work_name: input.work_name as string | undefined,
+    work_type: input.work_type as string | undefined,
+    built_area: input.built_area as string | number | undefined,
+    floors: input.floors as string | number | undefined,
+    construction_standard: input.construction_standard as string | undefined,
+    location: input.location as string | undefined,
+    city_state: input.city_state as string | undefined,
+    deadline: input.deadline as string | undefined,
+    deadline_months: input.deadline_months as string | number | undefined,
+    base_date: input.base_date as string | undefined,
+    adjustment_index: input.adjustment_index as string | undefined,
+    adjustment_index_other: input.adjustment_index_other as string | undefined,
+    complexity: input.complexity as string | undefined,
+  }
+}
 
 export default class DocumentTemplatesController {
   private templateService = new DocumentTemplateService()
@@ -116,11 +88,13 @@ export default class DocumentTemplatesController {
     })
   }
 
-  async variables({ response }: HttpContext) {
+  async variables({ request, response }: HttpContext) {
+    const documentType = (request.input('document_type', 'GERAL') as DocumentType) || 'GERAL'
+
     return response.ok({
       success: true,
       message: 'Template variables listed successfully',
-      data: TEMPLATE_VARIABLES,
+      data: getTemplateVariablesByType(documentType),
     })
   }
 
@@ -134,6 +108,7 @@ export default class DocumentTemplatesController {
       templateId: params.id,
       clientId: request.input('client_id'),
       projectId: request.input('project_id'),
+      budgetData: parseBudgetData(request.input('budget_data')),
     })
 
     response.header('Content-Type', 'application/pdf')
@@ -143,7 +118,14 @@ export default class DocumentTemplatesController {
 
   async generatePdf({ auth, request, response }: HttpContext) {
     const user = auth.user as User
-    const payload = request.only(['name', 'content', 'client_id', 'project_id', 'template_id'])
+    const payload = request.only([
+      'name',
+      'content',
+      'client_id',
+      'project_id',
+      'template_id',
+      'budget_data',
+    ])
     const { default: DocumentTemplatePdfService } = await import(
       '#services/document_template_pdf_service'
     )
@@ -154,6 +136,7 @@ export default class DocumentTemplatesController {
       content: payload.content,
       clientId: payload.client_id,
       projectId: payload.project_id,
+      budgetData: parseBudgetData(payload.budget_data),
     })
 
     response.header('Content-Type', 'application/pdf')

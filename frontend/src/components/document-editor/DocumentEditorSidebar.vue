@@ -1,23 +1,34 @@
 <script setup>
-import { ref, computed, unref } from 'vue'
-import { TEMPLATE_VARIABLES } from './constants/variables'
+import { ref, computed, unref, watch } from 'vue'
+import { getTemplateVariablesByType } from './constants/variables'
 import { insertInActiveSection } from './utils/documentContent'
 
 const props = defineProps({
   editor: { type: Object, default: null },
+  documentType: { type: String, default: 'GERAL' },
 })
 
 const activeTab = ref('variables')
 const search = ref('')
-const openGroups = ref(TEMPLATE_VARIABLES.map((g) => g.id))
+
+const variableGroups = computed(() => getTemplateVariablesByType(props.documentType))
+const openGroups = ref(variableGroups.value.map((g) => g.id))
+
+watch(
+  () => props.documentType,
+  (type) => {
+    openGroups.value = getTemplateVariablesByType(type).map((g) => g.id)
+  }
+)
 
 const editorInstance = computed(() => unref(props.editor))
 
 const filteredGroups = computed(() => {
   const term = search.value.trim().toLowerCase()
-  if (!term) return TEMPLATE_VARIABLES
+  const groups = variableGroups.value
+  if (!term) return groups
 
-  return TEMPLATE_VARIABLES.map((group) => ({
+  return groups.map((group) => ({
     ...group,
     items: group.items.filter(
       (item) =>

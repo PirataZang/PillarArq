@@ -16,6 +16,7 @@ import {
 const props = defineProps({
   modelValue: { type: Object, default: null },
   title: { type: String, default: 'Novo Template' },
+  documentType: { type: String, default: 'GERAL' },
 })
 
 const emit = defineEmits(['update:modelValue', 'save', 'preview', 'download'])
@@ -161,7 +162,7 @@ defineExpose({
     </header>
 
     <div class="flex min-h-0 flex-1">
-      <DocumentEditorSidebar :editor="editor" />
+      <DocumentEditorSidebar :editor="editor" :document-type="documentType" />
 
       <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div class="flex-1 overflow-y-auto bg-marble-100 px-6 py-8">

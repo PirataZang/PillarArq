@@ -87,7 +87,7 @@ export class CompanyPhaseTemplateSchema extends BaseModel {
 }
 
 export class DocumentTemplateSchema extends BaseModel {
-  static $columns = ['clientId', 'companyId', 'content', 'createdAt', 'createdBy', 'deletedAt', 'id', 'name', 'updatedAt', 'updatedBy'] as const
+  static $columns = ['clientId', 'companyId', 'content', 'createdAt', 'createdBy', 'deletedAt', 'documentType', 'id', 'name', 'updatedAt', 'updatedBy'] as const
   $columns = DocumentTemplateSchema.$columns
   @column()
   declare clientId: bigint | number | null
@@ -101,6 +101,8 @@ export class DocumentTemplateSchema extends BaseModel {
   declare createdBy: bigint | number | null
   @column.dateTime()
   declare deletedAt: DateTime | null
+  @column()
+  declare documentType: string
   @column({ isPrimary: true })
   declare id: bigint | number
   @column()

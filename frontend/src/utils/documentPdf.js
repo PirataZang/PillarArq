@@ -27,8 +27,9 @@ export async function downloadDocumentPdf({
   content,
   clientId,
   projectId,
+  budgetData,
 }) {
-  const useSavedOnly = templateId && !content
+  const useSavedOnly = templateId && !content && !budgetData
 
   if (useSavedOnly) {
     const { data, headers } = await api.get(`/document-templates/${templateId}/pdf`, {
@@ -54,6 +55,7 @@ export async function downloadDocumentPdf({
       content,
       client_id: clientId ? Number(clientId) : undefined,
       project_id: projectId ? Number(projectId) : undefined,
+      budget_data: budgetData || undefined,
     },
     {
       responseType: 'blob',

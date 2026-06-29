@@ -16,7 +16,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 // Controle dos submenus abertos
-const openMenus = ref(['finance'])
+const openMenus = ref(['finance', 'reports'])
 
 const handleAccordionClick = (menuId) => {
   if (openMenus.value.includes(menuId)) {
@@ -33,6 +33,19 @@ const navigation = ref([
   { id: 'projects', name: 'Obras', href: '/projects', icon: 'fa-solid fa-building', permission: 'projects.list' },
   { id: 'clients', name: 'Clientes', href: '/clients', icon: 'fa-solid fa-user-tie' },
   { id: 'documents', name: 'Documentos', href: '/documents', icon: 'fa-solid fa-file-lines' },
+  {
+    id: 'reports',
+    name: 'Relatórios',
+    icon: 'fa-solid fa-chart-column',
+    children: [
+      {
+        id: 'budget-generate',
+        name: 'Gerar orçamento',
+        href: '/reports/budget',
+        icon: 'fa-solid fa-file-invoice-dollar',
+      },
+    ],
+  },
   { id: 'users', name: 'Usuários', href: '/users', icon: 'fa-solid fa-users', permission: 'user.list' },
   { id: 'settings', name: 'Configurações', href: '/settings', icon: 'fa-solid fa-gear' },
   {

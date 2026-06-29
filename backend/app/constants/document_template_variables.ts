@@ -1,9 +1,17 @@
-export const DOCUMENT_TYPE_OPTIONS = [
-  { value: 'GERAL', label: 'Geral' },
-  { value: 'ORCAMENTO', label: 'Orçamento' },
-]
+import type { DocumentType } from '#constants/document_type'
 
-export const GENERAL_TEMPLATE_VARIABLES = [
+export interface TemplateVariableItem {
+  key: string
+  label: string
+}
+
+export interface TemplateVariableGroup {
+  id: string
+  label: string
+  items: TemplateVariableItem[]
+}
+
+export const GENERAL_TEMPLATE_VARIABLES: TemplateVariableGroup[] = [
   {
     id: 'company',
     label: 'Empresa',
@@ -54,7 +62,7 @@ export const GENERAL_TEMPLATE_VARIABLES = [
   },
 ]
 
-export const BUDGET_TEMPLATE_VARIABLES = [
+export const BUDGET_TEMPLATE_VARIABLES: TemplateVariableGroup[] = [
   {
     id: 'budget_identification',
     label: 'Identificação da Obra',
@@ -88,13 +96,6 @@ export const BUDGET_TEMPLATE_VARIABLES = [
   },
 ]
 
-export const TEMPLATE_VARIABLES = GENERAL_TEMPLATE_VARIABLES
-
-export function getTemplateVariablesByType(documentType = 'GERAL') {
+export function getTemplateVariablesByType(documentType: DocumentType = 'GERAL'): TemplateVariableGroup[] {
   return documentType === 'ORCAMENTO' ? BUDGET_TEMPLATE_VARIABLES : GENERAL_TEMPLATE_VARIABLES
 }
-
-export const flattenVariables = (documentType = 'GERAL') =>
-  getTemplateVariablesByType(documentType).flatMap((group) =>
-    group.items.map((item) => ({ ...item, group: group.label }))
-  )

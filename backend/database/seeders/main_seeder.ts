@@ -2,6 +2,7 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import Company from '#models/company'
 import User from '#models/user'
 import { seedDefaultPhaseTemplates } from '#utils/company_phase_templates'
+import { seedDefaultBudgetTemplate } from '#utils/default_budget_template'
 
 export default class extends BaseSeeder {
   async run() {
@@ -14,6 +15,7 @@ export default class extends BaseSeeder {
     })
 
     await seedDefaultPhaseTemplates(adminCompany.id)
+    await seedDefaultBudgetTemplate(adminCompany.id)
 
     await User.create({
       companyId: adminCompany.id,

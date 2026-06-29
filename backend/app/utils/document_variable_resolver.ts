@@ -4,6 +4,7 @@ import User from '#models/user'
 import Client from '#models/client'
 import Project from '#models/project'
 import { buildProjectBudgetSummary } from '#utils/project_budget'
+import { buildBudgetVariables, type BudgetVariableInput } from '#utils/budget_variables'
 import type { ProjectStatus } from '#constants/project_status'
 
 const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
@@ -30,6 +31,7 @@ function formatDate(value: DateTime | null | undefined): string {
 export interface DocumentVariableContextOptions {
   clientId?: number | string | null
   projectId?: number | string | null
+  budgetData?: BudgetVariableInput | null
 }
 
 export async function buildDocumentVariableContext(
@@ -66,6 +68,7 @@ export async function buildDocumentVariableContext(
   }
 
   const budget = project ? buildProjectBudgetSummary(project) : null
+  const budgetVariables = options.budgetData ? buildBudgetVariables(options.budgetData) : {}
 
   return {
     'company.name': company.name ?? '',
@@ -86,5 +89,6 @@ export async function buildDocumentVariableContext(
     'project.start_date': project ? formatDate(project.startDate) : '',
     'proposal.total': budget ? formatCurrency(budget.budget_total) : '',
     'proposal.date': formatDate(DateTime.now()),
+    ...budgetVariables,
   }
 }

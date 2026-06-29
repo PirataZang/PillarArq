@@ -20,6 +20,7 @@ import CompanyFormPage from '@/pages/companies/CompanyFormPage.vue'
 import SettingsPage from '@/pages/settings/SettingsPage.vue'
 import DocumentTemplateListPage from '@/pages/documents/DocumentTemplateListPage.vue'
 import DocumentTemplateEditorPage from '@/pages/documents/DocumentTemplateEditorPage.vue'
+import BudgetGeneratePage from '@/pages/reports/BudgetGeneratePage.vue'
 
 const routes = [
   {
@@ -151,6 +152,12 @@ const routes = [
         name: 'documents.edit',
         component: DocumentTemplateEditorPage,
         meta: { title: 'Documentos', fullWidth: true },
+      },
+      {
+        path: 'reports/budget',
+        name: 'reports.budget',
+        component: BudgetGeneratePage,
+        meta: { title: 'Gerar orçamento' },
       },
     ],
   },

@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import type { DocumentType } from '#constants/document_type'
 import Company from './company.js'
 import Client from './client.js'
 
@@ -16,6 +17,9 @@ export default class DocumentTemplate extends BaseModel {
 
   @column()
   declare name: string
+
+  @column({ serializeAs: 'document_type' })
+  declare documentType: DocumentType
 
   @column()
   declare content: Record<string, unknown>

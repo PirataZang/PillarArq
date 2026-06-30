@@ -9,6 +9,7 @@ import { DEFAULT_BUDGET_DOCUMENT_CONTENT } from '@/components/document-editor/co
 import { DOCUMENT_TYPE_OPTIONS } from '@/components/document-editor/constants/variables'
 import { useSwal } from '@/utils/swal'
 import { downloadDocumentPdf } from '@/utils/documentPdf'
+import FormLogsButton from '@/components/audit/FormLogsButton.vue'
 import api from '@/services/api'
 
 const route = useRoute()
@@ -164,19 +165,26 @@ const handleDownload = async (json) => {
       Carregando editor...
     </div>
     <div v-else class="space-y-4 px-4 sm:px-6">
-      <div class="grid gap-4 rounded-xl border border-marble-200 bg-white p-4 sm:grid-cols-3">
-        <Input v-model="templateName" label="Nome do template" placeholder="Ex: Proposta comercial" />
-        <Select
-          v-model="documentType"
-          label="Tipo do documento"
-          :options="DOCUMENT_TYPE_OPTIONS"
-          placeholder="Selecione o tipo"
-        />
-        <Select
-          v-model="clientId"
-          label="Cliente (opcional)"
-          :options="clientOptions"
-          placeholder="Template geral"
+      <div class="flex items-center justify-between gap-4">
+        <div class="grid flex-1 gap-4 rounded-xl border border-marble-200 bg-white p-4 sm:grid-cols-3">
+          <Input v-model="templateName" label="Nome do template" placeholder="Ex: Proposta comercial" />
+          <Select
+            v-model="documentType"
+            label="Tipo do documento"
+            :options="DOCUMENT_TYPE_OPTIONS"
+            placeholder="Selecione o tipo"
+          />
+          <Select
+            v-model="clientId"
+            label="Cliente (opcional)"
+            :options="clientOptions"
+            placeholder="Template geral"
+          />
+        </div>
+        <FormLogsButton
+          v-if="isEdit()"
+          subject-type="DocumentTemplate"
+          :subject-id="route.params.id"
         />
       </div>
 

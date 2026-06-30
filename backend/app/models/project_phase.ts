@@ -2,8 +2,9 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Project from './project.js'
+import { Auditable } from './mixins/auditable.js'
 
-export default class ProjectPhase extends BaseModel {
+export default class ProjectPhase extends Auditable(BaseModel) {
   @column({ isPrimary: true })
   declare id: string
 

@@ -4,8 +4,9 @@ import { BaseModel, column, belongsTo, hasMany, beforeSave } from '@adonisjs/luc
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Company from './company.js'
 import UserPermission from './user_permission.js'
+import { Auditable } from './mixins/auditable.js'
 
-export default class User extends BaseModel {
+export default class User extends Auditable(BaseModel) {
   @column({ isPrimary: true })
   declare id: string
 

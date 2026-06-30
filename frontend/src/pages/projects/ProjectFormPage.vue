@@ -6,6 +6,7 @@ import Input from '@/components/utils/Input.vue'
 import Textarea from '@/components/utils/Textarea.vue'
 import Select from '@/components/utils/Select.vue'
 import Button from '@/components/utils/Button.vue'
+import FormLogsButton from '@/components/audit/FormLogsButton.vue'
 import { useSwal } from '@/utils/swal'
 import { PROJECT_STATUS_OPTIONS } from '@/utils/projectLabels'
 import api from '@/services/api'
@@ -126,21 +127,24 @@ const handleSave = async () => {
 
 <template>
   <div>
-    <div class="mb-8 flex items-center gap-4">
-      <button
-        @click="router.back()"
-        class="p-2 -ml-2 rounded-md text-marble-400 hover:text-marble-900 hover:bg-marble-100 transition-colors"
-      >
-        <i class="fa-solid fa-arrow-left text-lg"></i>
-      </button>
-      <div>
-        <h1 class="text-2xl font-bold text-marble-900 tracking-tight">
-          {{ isEdit ? 'Editar Obra' : 'Nova Obra' }}
-        </h1>
-        <p class="mt-1 text-sm text-marble-600">
-          Defina cliente, área e parâmetros iniciais da obra.
-        </p>
+    <div class="mb-8 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button
+          @click="router.back()"
+          class="p-2 -ml-2 rounded-md text-marble-400 hover:text-marble-900 hover:bg-marble-100 transition-colors"
+        >
+          <i class="fa-solid fa-arrow-left text-lg"></i>
+        </button>
+        <div>
+          <h1 class="text-2xl font-bold text-marble-900 tracking-tight">
+            {{ isEdit ? 'Editar Obra' : 'Nova Obra' }}
+          </h1>
+          <p class="mt-1 text-sm text-marble-600">
+            Defina cliente, área e parâmetros iniciais da obra.
+          </p>
+        </div>
       </div>
+      <FormLogsButton v-if="isEdit" subject-type="Project" :subject-id="route.params.id" />
     </div>
 
     <Card>

@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import User from '#models/user'
+import { setAuditCompanyId } from '#utils/audit_context'
 
 export default class TenantMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
@@ -29,6 +30,8 @@ export default class TenantMiddleware {
         errors: []
       })
     }
+
+    setAuditCompanyId(user.companyId)
 
     await next()
   }

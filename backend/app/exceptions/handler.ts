@@ -44,9 +44,20 @@ export default class HttpExceptionHandler extends ExceptionHandler {
       })
     }
 
-    const err = error as any
+    const err = error as { status?: number; message?: string; code?: string; stack?: string; constraint?: string }
     const status = err.status || 500
-    const message = err.message || 'Ocorreu um erro inesperado'
+    let message = err.message || 'Ocorreu um erro inesperado'
+
+    if (
+      err.code === '23505' &&
+      (err.constraint?.includes('email') || message.includes('users_email'))
+    ) {
+      return ctx.response.status(422).send({
+        success: false,
+        message: 'Este e-mail já está em uso por outro usuário.',
+        errors: [{ field: 'email', message: 'Este e-mail já está em uso por outro usuário.' }],
+      })
+    }
 
     return ctx.response.status(status).send({
       success: false,

@@ -2,8 +2,9 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
+import { Auditable } from './mixins/auditable.js'
 
-export default class Company extends BaseModel {
+export default class Company extends Auditable(BaseModel) {
   @column({ isPrimary: true })
   declare id: string // Note: bigIncrements usually maps to string in TS to avoid precision loss
 

@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import Card from '@/components/utils/Card.vue'
 import Input from '@/components/utils/Input.vue'
 import Button from '@/components/utils/Button.vue'
+import FormLogsButton from '@/components/audit/FormLogsButton.vue'
 import Switch from '@/components/utils/Switch.vue'
 import { useSwal } from '@/utils/swal'
 import api from '@/services/api'
@@ -100,6 +101,7 @@ const cancel = () => {
           {{ isEdit ? 'Edite as informações da empresa cadastrada.' : 'Cadastre uma nova empresa (tenant) no sistema.' }}
         </p>
       </div>
+      <FormLogsButton v-if="isEdit" subject-type="Company" :subject-id="route.params.id" />
     </div>
 
     <Card :loading="fetching">

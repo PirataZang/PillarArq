@@ -275,7 +275,7 @@ onUnmounted(() => {
             <!-- Sidebar aberto: accordion com texto -->
             <template v-else>
               <button @click="handleAccordionClick(item.id)" :class="[
-                'group relative flex items-center h-12 w-full text-sm font-medium rounded-xl transition-all duration-300 px-4',
+                'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4 min-w-0',
                 'text-marble-300 hover:bg-charcoal-light hover:text-white',
               ]">
                 <span class="w-8 h-8 flex items-center justify-center shrink-0">

@@ -20,9 +20,16 @@ let searchTimeout = null
 const kanbanColumns = computed(() =>
   phaseTemplates.value.map((template) => ({
     ...template,
-    projects: projects.value.filter((project) => currentPhase(project)?.name === template.name),
+    projects: projects.value.filter(
+      (project) => Number(currentPhase(project)?.sort_order) === Number(template.sort_order)
+    ),
   }))
 )
+
+const projectProgressPercent = (project) => {
+  const phase = currentPhase(project)
+  return Number(phase?.weight_percent ?? project.progress_percent ?? 0)
+}
 
 function formatDate(value) {
   if (!value) return '—'
@@ -99,7 +106,7 @@ const currentPhase = (project) => {
 }
 
 const phaseForTemplate = (project, template) => {
-  return project.phases?.find((phase) => phase.name === template.name)
+  return project.phases?.find((phase) => Number(phase.sort_order) === Number(template.sort_order))
 }
 
 const handleDragStart = (project, event) => {
@@ -205,7 +212,7 @@ const handleDrop = async (template) => {
               @dragstart="handleDragStart(project, $event)" @dragend="draggedProjectId = null"
               @click="openProject(project)">
               <span class="text-[11px] font-semibold uppercase tracking-wide" :style="{ color: statusColor(column) }">
-                {{ project.progress_percent }}% concluído
+                {{ projectProgressPercent(project) }}% concluído
               </span>
               <h3 class="mt-1 line-clamp-2 text-sm font-semibold text-marble-900">{{ project.name }}</h3>
               <p class="mt-2 truncate text-xs text-marble-500">{{ project.client?.name }}</p>

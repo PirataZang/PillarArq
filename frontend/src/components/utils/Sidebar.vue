@@ -30,10 +30,12 @@ const isMaster = computed(() => !!authStore.user?.is_master)
 
 const navigation = ref([
   { id: 'dashboard', name: 'Dashboard', href: '/dashboard', icon: 'fa-solid fa-chart-pie' },
-  { id: 'buildings', name: 'Obras', icon: 'fa-solid fa-building', children: [
-    { id: 'projects', name: 'Listagem', href: '/projects', icon: 'fa-solid fa-building', permission: 'projects.list' },
-    { id: 'projects-kanban', name: 'Kanban', href: '/projects/kanban', icon: 'fa-solid fa-table-columns', permission: 'projects.list' },
-  ] },
+  {
+    id: 'buildings', name: 'Obras', icon: 'fa-solid fa-building', children: [
+      { id: 'projects', name: 'Listagem', href: '/projects', icon: 'fa-solid fa-building', permission: 'projects.list' },
+      { id: 'projects-kanban', name: 'Kanban', href: '/projects/kanban', icon: 'fa-solid fa-table-columns', permission: 'projects.list' },
+    ]
+  },
   { id: 'clients', name: 'Clientes', href: '/clients', icon: 'fa-solid fa-user-tie' },
   {
     id: 'reports',
@@ -118,7 +120,7 @@ onMounted(async () => {
       const { data } = await api.get('/companies')
       if (data && data.success) {
         companiesList.value = data.data
-        
+
         // Se o selectedCompanyId não estiver na lista (por exemplo, se foi excluído), redefine
         const exists = companiesList.value.some(c => c.id === selectedCompanyId.value)
         if (!exists && companiesList.value.length > 0) {
@@ -220,7 +222,8 @@ onUnmounted(() => {
             'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
           ]" @click="handleLinkClick">
             <span class="w-8 h-8 flex items-center justify-center shrink-0">
-              <i :class="[isActive(item.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
+              <i
+                :class="[isActive(item.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
             </span>
             <span :class="[
               open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
@@ -228,7 +231,8 @@ onUnmounted(() => {
             ]">{{ item.name }}</span>
 
             <!-- Tooltip -->
-            <div v-if="!open" class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+            <div v-if="!open"
+              class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
               {{ item.name }}
             </div>
           </router-link>
@@ -240,7 +244,8 @@ onUnmounted(() => {
               openMenus.includes(item.id) && open ? 'text-white' : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
             ]">
               <span class="w-8 h-8 flex items-center justify-center shrink-0">
-                <i :class="[openMenus.includes(item.id) && open ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
+                <i
+                  :class="[openMenus.includes(item.id) && open ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
               </span>
               <span :class="[
                 open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
@@ -253,21 +258,25 @@ onUnmounted(() => {
               ]"></i>
 
               <!-- Tooltip -->
-              <div v-if="!open" class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+              <div v-if="!open"
+                class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
                 {{ item.name }}
               </div>
             </button>
 
             <!-- Submenu Items -->
-            <div v-show="openMenus.includes(item.id) && open" class="space-y-1 mt-1 mb-2 transition-all duration-300 ease-in-out" :class="open ? 'pl-4' : 'pl-0'">
-              <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href" :title="!open ? subItem.name : ''" :class="[
-                isActive(subItem.href)
-                  ? 'bg-white/8 text-white border-l-2 border-l-orange-500'
-                  : 'text-marble-400 hover:bg-charcoal-light/80 hover:text-white',
-                'group flex items-center h-10 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
-              ]" @click="handleLinkClick">
+            <div v-show="openMenus.includes(item.id) && open"
+              class="space-y-1 mt-1 mb-2 transition-all duration-300 ease-in-out" :class="open ? 'pl-4' : 'pl-0'">
+              <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href"
+                :title="!open ? subItem.name : ''" :class="[
+                  isActive(subItem.href)
+                    ? 'bg-white/8 text-white border-l-2 border-l-orange-500'
+                    : 'text-marble-400 hover:bg-charcoal-light/80 hover:text-white',
+                  'group flex items-center h-10 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
+                ]" @click="handleLinkClick">
                 <span class="w-8 h-8 flex items-center justify-center shrink-0">
-                  <i :class="[isActive(subItem.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', subItem.icon, 'fa-fw text-base text-center transition-colors']"></i>
+                  <i
+                    :class="[isActive(subItem.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', subItem.icon, 'fa-fw text-base text-center transition-colors']"></i>
                 </span>
                 <span :class="[
                   open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
@@ -281,33 +290,26 @@ onUnmounted(() => {
       </nav>
 
       <!-- Footer / Company Select -->
-      <div v-if="isMaster" ref="dropdownRef" class="p-4 border-t border-charcoal-border shrink-0 flex justify-center relative">
+      <div v-if="isMaster" ref="dropdownRef"
+        class="p-4 border-t border-charcoal-border shrink-0 flex justify-center relative">
         <!-- Dropdown Panel (Opens upward if sidebar is open, or as popover if closed) -->
-        <div v-if="showDropdown" 
-             :class="[
-               open 
-                 ? 'bottom-full mb-2 left-4 right-4 w-[calc(100%-2rem)]' 
-                 : 'left-full bottom-4 ml-3 w-64'
-             ]"
-             class="absolute z-50 bg-charcoal-light border border-charcoal-border rounded-xl p-3 shadow-xl flex flex-col gap-2">
-          
+        <div v-if="showDropdown" :class="[
+          open
+            ? 'bottom-full mb-2 left-4 right-4 w-[calc(100%-2rem)]'
+            : 'left-full bottom-4 ml-3 w-64'
+        ]"
+          class="absolute z-50 bg-charcoal-light border border-charcoal-border rounded-xl p-3 shadow-xl flex flex-col gap-2">
+
           <!-- Search Field -->
           <div class="relative">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Pesquisar empresa..."
+            <input v-model="searchQuery" type="text" placeholder="Pesquisar empresa..."
               class="w-full bg-charcoal border border-charcoal-border rounded-lg text-xs py-2 pl-8 pr-3 text-white placeholder-marble-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-              @click.stop
-            />
+              @click.stop />
             <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-marble-500">
               <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
             </div>
-            <button 
-              v-if="searchQuery" 
-              @click.stop="searchQuery = ''"
-              class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-marble-500 hover:text-white"
-            >
+            <button v-if="searchQuery" @click.stop="searchQuery = ''"
+              class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-marble-500 hover:text-white">
               <i class="fa-solid fa-xmark text-[10px]"></i>
             </button>
           </div>
@@ -315,15 +317,12 @@ onUnmounted(() => {
           <!-- List of Companies -->
           <div class="max-h-48 overflow-y-auto space-y-1 custom-scrollbar pr-1">
             <template v-if="filteredCompanies.length > 0">
-              <button
-                v-for="company in filteredCompanies"
-                :key="company.id"
-                @click.stop="selectCompany(company.id)"
+              <button v-for="company in filteredCompanies" :key="company.id" @click.stop="selectCompany(company.id)"
                 class="w-full text-left text-xs font-medium py-2 px-3 rounded-lg hover:bg-white/5 transition-colors text-marble-300 hover:text-white flex items-center justify-between"
-                :class="selectedCompanyId === company.id ? 'bg-orange-500/10 text-orange-400 font-semibold border-l-2 border-l-orange-500 rounded-l-none' : ''"
-              >
+                :class="selectedCompanyId === company.id ? 'bg-orange-500/10 text-orange-400 font-semibold border-l-2 border-l-orange-500 rounded-l-none' : ''">
                 <span class="truncate">{{ company.name }}</span>
-                <i v-if="selectedCompanyId === company.id" class="fa-solid fa-check text-[10px] text-orange-400 ml-2"></i>
+                <i v-if="selectedCompanyId === company.id"
+                  class="fa-solid fa-check text-[10px] text-orange-400 ml-2"></i>
               </button>
             </template>
             <div v-else class="text-[11px] text-marble-500 py-3 text-center">
@@ -333,9 +332,9 @@ onUnmounted(() => {
         </div>
 
         <!-- Clickable Selector -->
-        <div @click.stop="toggleDropdown" 
-             class="group relative flex items-center bg-charcoal-light hover:bg-charcoal-light/80 rounded-xl p-1 border border-charcoal-border cursor-pointer select-none transition-all duration-300 w-full"
-             :class="open ? 'max-w-full' : 'max-w-12 justify-center'">
+        <div @click.stop="toggleDropdown"
+          class="group relative flex items-center bg-charcoal-light hover:bg-charcoal-light/80 rounded-xl p-1 border border-charcoal-border cursor-pointer select-none transition-all duration-300 w-full"
+          :class="open ? 'max-w-full' : 'max-w-12 justify-center'">
           <div class="w-10 h-10 rounded-lg bg-charcoal-muted flex items-center justify-center shrink-0">
             <i class="fa-solid fa-building text-marble-400 text-sm"></i>
           </div>
@@ -346,12 +345,14 @@ onUnmounted(() => {
               {{ selectedCompany.name }}
             </span>
             <div class="text-gray-500 shrink-0">
-              <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" :class="showDropdown ? 'rotate-180' : ''"></i>
+              <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"
+                :class="showDropdown ? 'rotate-180' : ''"></i>
             </div>
           </div>
 
           <!-- Tooltip (Only if sidebar is closed and dropdown is closed) -->
-          <div v-if="!open && !showDropdown" class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+          <div v-if="!open && !showDropdown"
+            class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
             Empresas
           </div>
         </div>

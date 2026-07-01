@@ -47,7 +47,7 @@ export function calculateExpensesTotal(project: Project): number {
   }, 0)
 }
 
-function calculateCumulativeProgress(
+function calculateProgressFromActivePhase(
   phases: Array<{
     isActive: boolean
     weight: number
@@ -66,11 +66,7 @@ function calculateCumulativeProgress(
     return 0
   }
 
-  const total = phases
-    .filter((phase) => phase.sortOrder <= activePhase.sortOrder)
-    .reduce((sum, phase) => sum + phase.weight, 0)
-
-  return Math.min(100, Math.round(total))
+  return Math.min(100, Math.round(activePhase.weight))
 }
 
 export function calculateProgressPercent(project: Project): number {
@@ -78,7 +74,7 @@ export function calculateProgressPercent(project: Project): number {
     return project.progressPercent ?? 0
   }
 
-  return calculateCumulativeProgress(
+  return calculateProgressFromActivePhase(
     project.phases.map((phase) => ({
       isActive: phase.isCompleted,
       weight: toNumber(phase.weightPercent),
@@ -94,7 +90,7 @@ export function calculateProgressPercentFromPhases(
     sort_order?: number
   }>
 ) {
-  return calculateCumulativeProgress(
+  return calculateProgressFromActivePhase(
     phases.map((phase) => ({
       isActive: Boolean(phase.is_completed),
       weight: toNumber(phase.weight_percent),

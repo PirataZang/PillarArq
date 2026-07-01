@@ -56,6 +56,23 @@ const budget = computed(() => project.value?.budget_summary ?? {})
 const materials = computed(() => project.value?.materials ?? [])
 const expenses = computed(() => project.value?.expenses ?? [])
 const phases = computed(() => project.value?.phases ?? [])
+
+const currentPhase = computed(() => {
+  const completed = phases.value
+    .filter((phase) => phase.is_completed)
+    .sort((a, b) => Number(b.sort_order) - Number(a.sort_order))
+  return completed[0] ?? phases.value[0] ?? null
+})
+
+const phaseColor = (phase) => phase?.color || '#5c5852'
+
+const hexToRgba = (hex, opacity) => {
+  const value = hex.replace('#', '')
+  const red = parseInt(value.slice(0, 2), 16)
+  const green = parseInt(value.slice(2, 4), 16)
+  const blue = parseInt(value.slice(4, 6), 16)
+  return `rgba(${red}, ${green}, ${blue}, ${opacity})`
+}
 const notes = computed(() => project.value?.notes ?? [])
 
 const loadProject = async () => {
@@ -133,9 +150,11 @@ const toggleExpense = (expenseId) => {
 
 const getExpenseCategoryLabel = (category) => EXPENSE_CATEGORY_LABELS[category] ?? category
 
-const togglePhase = async (phase) => {
+const selectPhaseStatus = async (phase) => {
+  if (phase.is_completed) return
+
   await api.patch(`/projects/${projectId.value}/phases/${phase.id}`, {
-    is_completed: !phase.is_completed,
+    is_completed: true,
   })
   await loadProject()
 }
@@ -451,7 +470,7 @@ const removeNote = async (noteId) => {
     </div>
 
     <!-- Progress -->
-    <Card v-if="activeTab === 'progress'" title="Etapas da obra">
+    <Card v-if="activeTab === 'progress'" title="Status de progresso">
       <div class="mb-4">
         <div class="flex justify-between text-sm mb-2">
           <span class="text-marble-600">Progresso geral</span>
@@ -459,23 +478,49 @@ const removeNote = async (noteId) => {
         </div>
         <div class="w-full bg-marble-200 rounded-full h-2">
           <div
-            class="bg-charcoal h-2 rounded-full transition-all"
-            :style="{ width: `${project.progress_percent}%` }"
+            class="h-2 rounded-full transition-all"
+            :style="{
+              width: `${project.progress_percent}%`,
+              backgroundColor: phaseColor(currentPhase),
+            }"
           ></div>
         </div>
       </div>
       <div class="space-y-2">
-        <label
+        <button
           v-for="phase in phases"
           :key="phase.id"
-          class="flex items-start gap-3 p-3 rounded-lg border border-marble-200 hover:bg-marble-50 cursor-pointer"
+          type="button"
+          class="flex w-full items-start gap-3 p-3 rounded-lg border text-left transition-colors"
+          :class="phase.is_completed ? 'ring-1' : 'border-marble-200 hover:bg-marble-50'"
+          :style="
+            phase.is_completed
+              ? {
+                  borderColor: phaseColor(phase),
+                  backgroundColor: hexToRgba(phaseColor(phase), 0.06),
+                  boxShadow: `inset 0 0 0 1px ${hexToRgba(phaseColor(phase), 0.12)}`,
+                }
+              : undefined
+          "
+          @click="selectPhaseStatus(phase)"
         >
-          <input
-            type="checkbox"
-            :checked="phase.is_completed"
-            class="h-4 w-4 mt-0.5 rounded border-marble-300 text-marble-700 shrink-0"
-            @change="togglePhase(phase)"
-          />
+          <span
+            class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border"
+            :class="phase.is_completed ? 'text-white' : ''"
+            :style="
+              phase.is_completed
+                ? {
+                    borderColor: phaseColor(phase),
+                    backgroundColor: phaseColor(phase),
+                  }
+                : {
+                    borderColor: phaseColor(phase),
+                    backgroundColor: hexToRgba(phaseColor(phase), 0.15),
+                  }
+            "
+          >
+            <i v-if="phase.is_completed" class="fa-solid fa-check text-[9px]"></i>
+          </span>
           <div class="flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-2">
               <p class="text-sm font-medium text-marble-900">{{ phase.name }}</p>
@@ -487,7 +532,7 @@ const removeNote = async (noteId) => {
               {{ phase.description }}
             </p>
           </div>
-        </label>
+        </button>
       </div>
     </Card>
 

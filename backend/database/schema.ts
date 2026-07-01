@@ -91,8 +91,10 @@ export class CompanySchema extends BaseModel {
 }
 
 export class CompanyPhaseTemplateSchema extends BaseModel {
-  static $columns = ['companyId', 'createdAt', 'description', 'id', 'name', 'sortOrder', 'updatedAt', 'weightPercent'] as const
+  static $columns = ['color', 'companyId', 'createdAt', 'description', 'id', 'name', 'sortOrder', 'updatedAt', 'weightPercent'] as const
   $columns = CompanyPhaseTemplateSchema.$columns
+  @column()
+  declare color: string
   @column()
   declare companyId: bigint | number
   @column.dateTime({ autoCreate: true })

@@ -30,7 +30,10 @@ const isMaster = computed(() => !!authStore.user?.is_master)
 
 const navigation = ref([
   { id: 'dashboard', name: 'Dashboard', href: '/dashboard', icon: 'fa-solid fa-chart-pie' },
-  { id: 'projects', name: 'Obras', href: '/projects', icon: 'fa-solid fa-building', permission: 'projects.list' },
+  { id: 'buildings', name: 'Obras', icon: 'fa-solid fa-building', children: [
+    { id: 'projects', name: 'Listagem', href: '/projects', icon: 'fa-solid fa-building', permission: 'projects.list' },
+    { id: 'projects-kanban', name: 'Kanban', href: '/projects/kanban', icon: 'fa-solid fa-table-columns', permission: 'projects.list' },
+  ] },
   { id: 'clients', name: 'Clientes', href: '/clients', icon: 'fa-solid fa-user-tie' },
   {
     id: 'reports',
@@ -95,6 +98,7 @@ const filteredNavigation = computed(() => {
 
 const isActive = (href) => {
   if (href === '/') return route.path === '/'
+  if (href === '/projects') return route.path.startsWith('/projects') && !route.path.startsWith('/projects/kanban')
   return route.path.startsWith(href)
 }
 

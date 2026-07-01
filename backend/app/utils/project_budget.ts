@@ -47,16 +47,60 @@ export function calculateExpensesTotal(project: Project): number {
   }, 0)
 }
 
+function calculateCumulativeProgress(
+  phases: Array<{
+    isActive: boolean
+    weight: number
+    sortOrder: number
+  }>
+) {
+  if (!phases.length) {
+    return 0
+  }
+
+  const activePhase = phases
+    .filter((phase) => phase.isActive)
+    .sort((a, b) => b.sortOrder - a.sortOrder)[0]
+
+  if (!activePhase) {
+    return 0
+  }
+
+  const total = phases
+    .filter((phase) => phase.sortOrder <= activePhase.sortOrder)
+    .reduce((sum, phase) => sum + phase.weight, 0)
+
+  return Math.min(100, Math.round(total))
+}
+
 export function calculateProgressPercent(project: Project): number {
   if (!project.phases?.length) {
     return project.progressPercent ?? 0
   }
 
-  const completedWeight = project.phases
-    .filter((phase) => phase.isCompleted)
-    .reduce((total, phase) => total + toNumber(phase.weightPercent), 0)
+  return calculateCumulativeProgress(
+    project.phases.map((phase) => ({
+      isActive: phase.isCompleted,
+      weight: toNumber(phase.weightPercent),
+      sortOrder: toNumber(phase.sortOrder),
+    }))
+  )
+}
 
-  return Math.min(100, Math.round(completedWeight))
+export function calculateProgressPercentFromPhases(
+  phases: Array<{
+    is_completed?: boolean
+    weight_percent?: number
+    sort_order?: number
+  }>
+) {
+  return calculateCumulativeProgress(
+    phases.map((phase) => ({
+      isActive: Boolean(phase.is_completed),
+      weight: toNumber(phase.weight_percent),
+      sortOrder: toNumber(phase.sort_order),
+    }))
+  )
 }
 
 export function buildProjectBudgetSummary(project: Project): ProjectBudgetSummary {

@@ -8,10 +8,15 @@ import type { Infer } from '@vinejs/vine/types'
 import type { createProjectValidator, updateProjectValidator } from '#validators/project_validator'
 import type { ProjectListFilters } from '#models/project'
 import { DEFAULT_PROJECT_STATUS } from '#constants/project_status'
-import { resolveProjectPhaseSeeds } from '#utils/company_phase_templates'
+import {
+  resolveProjectPhaseSeeds,
+  resolvePhaseTemplatesBySortOrder,
+  applyPhaseTemplates,
+  type PhaseTemplateSnapshot,
+} from '#utils/company_phase_templates'
 import {
   buildProjectBudgetSummary,
-  calculateProgressPercent,
+  calculateProgressPercentFromPhases,
 } from '#utils/project_budget'
 import { parseSqlDate } from '#utils/parse_sql_date'
 
@@ -42,27 +47,49 @@ export default class ProjectService {
 
   private serializeProject(project: Project) {
     const serialized = project.serialize()
-    const progressPercent = calculateProgressPercent(project)
 
     return {
       ...serialized,
-      progress_percent: progressPercent,
       budget_summary: buildProjectBudgetSummary(project),
     }
   }
 
-  private serializeProjectListItem(project: Project) {
+  private serializeProjectWithTemplates(
+    project: Project,
+    templatesBySortOrder: Map<number, PhaseTemplateSnapshot>
+  ) {
+    const serialized = this.serializeProject(project)
+    const phases = applyPhaseTemplates(serialized.phases ?? [], templatesBySortOrder)
+
+    return {
+      ...serialized,
+      phases,
+      progress_percent: calculateProgressPercentFromPhases(phases),
+    }
+  }
+
+  private async serializeProjectWithTemplatesForCompany(companyId: string, project: Project) {
+    const templatesBySortOrder = await resolvePhaseTemplatesBySortOrder(companyId)
+    return this.serializeProjectWithTemplates(project, templatesBySortOrder)
+  }
+
+  private serializeProjectListItem(
+    project: Project,
+    templatesBySortOrder: Map<number, PhaseTemplateSnapshot>
+  ) {
     const serialized = project.serialize()
+    const phases = applyPhaseTemplates(serialized.phases ?? [], templatesBySortOrder)
 
     return {
       id: serialized.id,
       name: serialized.name,
       status: serialized.status,
       area_m2: serialized.area_m2,
-      progress_percent: project.progressPercent,
+      progress_percent: calculateProgressPercentFromPhases(phases),
       start_date: serialized.start_date,
       expected_end_date: serialized.expected_end_date,
       client: serialized.client,
+      phases,
       updated_at: serialized.updated_at,
     }
   }
@@ -70,15 +97,18 @@ export default class ProjectService {
   async index(companyId: string, filters: ProjectListFilters = {}) {
     const projects = await Project.scopeList(companyId, filters)
       .preload('client')
+      .preload('phases', (query) => query.orderBy('sortOrder', 'asc'))
       .orderBy('updatedAt', 'desc')
 
-    return projects.map((project) => this.serializeProjectListItem(project))
+    const templatesBySortOrder = await resolvePhaseTemplatesBySortOrder(companyId)
+
+    return projects.map((project) => this.serializeProjectListItem(project, templatesBySortOrder))
   }
 
   async show(companyId: string, projectId: string) {
     const project = await this.findProjectOrFail(companyId, projectId)
     await this.loadProjectDetails(project)
-    return this.serializeProject(project)
+    return this.serializeProjectWithTemplatesForCompany(companyId, project)
   }
 
   async store(companyId: string, payload: CreateProjectPayload, userId?: string) {
@@ -124,19 +154,24 @@ export default class ProjectService {
 
     const phaseSeeds = await resolveProjectPhaseSeeds(companyId)
 
-    await ProjectPhase.createMany(
-      phaseSeeds.map((phase) => ({
+    const phases = await ProjectPhase.createMany(
+      phaseSeeds.map((phase, index) => ({
         companyId,
         projectId: project.id,
         name: phase.name,
         description: phase.description,
         weightPercent: phase.weightPercent,
+        isCompleted: index === 0,
+        completedAt: index === 0 ? DateTime.now() : null,
         sortOrder: phase.sortOrder,
       }))
     )
 
+    project.progressPercent = phases[0]?.weightPercent ?? 0
+    await project.save()
+
     await this.loadProjectDetails(project)
-    return this.serializeProject(project)
+    return this.serializeProjectWithTemplatesForCompany(companyId, project)
   }
 
   async update(companyId: string, projectId: string, payload: UpdateProjectPayload, userId?: string) {
@@ -200,7 +235,7 @@ export default class ProjectService {
 
     await project.save()
     await this.loadProjectDetails(project)
-    return this.serializeProject(project)
+    return this.serializeProjectWithTemplatesForCompany(companyId, project)
   }
 
   async destroy(companyId: string, projectId: string, userId?: string) {
@@ -239,6 +274,6 @@ export default class ProjectService {
     await project.save()
 
     await this.loadProjectDetails(project)
-    return this.serializeProject(project)
+    return this.serializeProjectWithTemplatesForCompany(companyId, project)
   }
 }

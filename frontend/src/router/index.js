@@ -12,6 +12,7 @@ import UserFormPage from '@/pages/users/UserFormPage.vue'
 import ClientListPage from '@/pages/clients/ClientListPage.vue'
 import ClientFormPage from '@/pages/clients/ClientFormPage.vue'
 import ProjectListPage from '@/pages/projects/ProjectListPage.vue'
+import ProjectKanbanPage from '@/pages/projects/ProjectKanbanPage.vue'
 import ProjectFormPage from '@/pages/projects/ProjectFormPage.vue'
 import ProjectDetailPage from '@/pages/projects/ProjectDetailPage.vue'
 import ComponentsTestPage from '@/pages/ComponentsTest.vue'
@@ -87,6 +88,12 @@ const routes = [
         name: 'projects.list',
         component: ProjectListPage,
         meta: { permission: 'projects.list', title: 'Obras' },
+      },
+      {
+        path: 'projects/kanban',
+        name: 'projects.kanban',
+        component: ProjectKanbanPage,
+        meta: { permission: 'projects.list', title: 'Projetos (Kanban)', fullWidth: true },
       },
       {
         path: 'projects/create',

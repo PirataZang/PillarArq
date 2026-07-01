@@ -13,6 +13,7 @@ const ProjectNotesController = () => import('#controllers/http/project_notes_con
 const CompanySettingsController = () => import('#controllers/http/company_settings_controller')
 const DocumentTemplatesController = () => import('#controllers/http/document_templates_controller')
 const DashboardController = () => import('#controllers/http/dashboard_controller')
+const ActivityLogsController = () => import('#controllers/http/activity_logs_controller')
 
 router.group(() => {
 
@@ -38,6 +39,9 @@ router.group(() => {
       router.put('/companies/:id', [CompaniesController, 'update'])
       router.delete('/companies/:id', [CompaniesController, 'destroy'])
     }).use(middleware.master())
+
+    router.get('/activity-logs', [ActivityLogsController, 'index'])
+    router.get('/activity-logs/:subjectType/:subjectId', [ActivityLogsController, 'forSubject'])
 
     // Rotas de recursos associados a um tenant específico
     router.group(() => {

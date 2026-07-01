@@ -5,6 +5,7 @@ import Card from '@/components/utils/Card.vue'
 import Input from '@/components/utils/Input.vue'
 import Select from '@/components/utils/Select.vue'
 import Button from '@/components/utils/Button.vue'
+import FormLogsButton from '@/components/audit/FormLogsButton.vue'
 import Switch from '@/components/utils/Switch.vue'
 import { useSwal } from '@/utils/swal'
 import api from '@/services/api'
@@ -146,6 +147,7 @@ const handleSave = async () => {
           </p>
         </div>
       </div>
+      <FormLogsButton v-if="isEdit" class="shrink-0" subject-type="User" :subject-id="route.params.id" />
     </div>
 
     <!-- Navegação de Abas -->

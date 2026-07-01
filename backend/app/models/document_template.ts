@@ -4,8 +4,9 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import type { DocumentType } from '#constants/document_type'
 import Company from './company.js'
 import Client from './client.js'
+import { Auditable } from './mixins/auditable.js'
 
-export default class DocumentTemplate extends BaseModel {
+export default class DocumentTemplate extends Auditable(BaseModel) {
   @column({ isPrimary: true })
   declare id: string
 

@@ -3,6 +3,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Card from '@/components/utils/Card.vue'
 import Button from '@/components/utils/Button.vue'
+import FormLogsButton from '@/components/audit/FormLogsButton.vue'
 import Input from '@/components/utils/Input.vue'
 import Textarea from '@/components/utils/Textarea.vue'
 import Select from '@/components/utils/Select.vue'
@@ -177,10 +178,13 @@ const removeNote = async (noteId) => {
           </p>
         </div>
       </div>
-      <Button variant="secondary" @click="router.push(`/projects/${project.id}/edit`)">
-        <i class="fa-solid fa-pen mr-2"></i>
-        Editar obra
-      </Button>
+      <div class="flex shrink-0 items-center gap-2">
+        <FormLogsButton subject-type="Project" :subject-id="project.id" />
+        <Button variant="secondary" @click="router.push(`/projects/${project.id}/edit`)">
+          <i class="fa-solid fa-pen mr-2"></i>
+          Editar obra
+        </Button>
+      </div>
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">

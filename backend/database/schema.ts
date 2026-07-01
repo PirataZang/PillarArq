@@ -7,6 +7,31 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class ActivityLogSchema extends BaseModel {
+  static $columns = ['companyId', 'event', 'id', 'ipAddress', 'newValues', 'oldValues', 'subjectId', 'subjectType', 'updateDate', 'userId'] as const
+  $columns = ActivityLogSchema.$columns
+  @column()
+  declare companyId: bigint | number | null
+  @column()
+  declare event: string
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare ipAddress: string | null
+  @column()
+  declare newValues: any | null
+  @column()
+  declare oldValues: any | null
+  @column()
+  declare subjectId: bigint | number
+  @column()
+  declare subjectType: string
+  @column.dateTime()
+  declare updateDate: DateTime
+  @column()
+  declare userId: bigint | number | null
+}
+
 export class ClientSchema extends BaseModel {
   static $columns = ['address', 'companyId', 'createdAt', 'createdBy', 'deletedAt', 'document', 'email', 'id', 'isActive', 'name', 'notes', 'phone', 'serviceRatePerM2', 'updatedAt', 'updatedBy'] as const
   $columns = ClientSchema.$columns

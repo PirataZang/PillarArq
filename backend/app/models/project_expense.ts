@@ -3,8 +3,9 @@ import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import type { ExpenseCategory } from '#constants/expense_category'
 import Project from './project.js'
+import { Auditable } from './mixins/auditable.js'
 
-export default class ProjectExpense extends BaseModel {
+export default class ProjectExpense extends Auditable(BaseModel) {
   @column({ isPrimary: true })
   declare id: string
 

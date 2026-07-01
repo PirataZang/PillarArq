@@ -3,6 +3,7 @@ import type { NextFn } from '@adonisjs/core/types/http'
 import jwt from 'jsonwebtoken'
 import User from '#models/user'
 import { AUTH_COOKIE_NAME, getJwtSecret, unauthorizedResponse } from '#utils/auth'
+import { runWithAuditContext } from '#utils/audit_context'
 
 function extractToken(ctx: HttpContext): string | null {
   const cookieToken = ctx.request.cookie(AUTH_COOKIE_NAME)
@@ -47,7 +48,10 @@ export default class AuthMiddleware {
 
       ctx.auth = { user }
 
-      await next()
+      return runWithAuditContext(
+        { userId: user.id, companyId: user.companyId, ipAddress: ctx.request.ip() },
+        () => next()
+      )
     } catch {
       return ctx.response.status(401).send(unauthorizedResponse())
     }

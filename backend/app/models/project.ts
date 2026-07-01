@@ -10,10 +10,11 @@ import ProjectExpense from './project_expense.js'
 import ProjectPhase from './project_phase.js'
 import ProjectNote from './project_note.js'
 import { applyProjectScopes, type ProjectListFilters } from './scopes/project_scopes.js'
+import { Auditable } from './mixins/auditable.js'
 
 export type { ProjectListFilters }
 
-export default class Project extends BaseModel {
+export default class Project extends Auditable(BaseModel) {
   @column({ isPrimary: true })
   declare id: string
 

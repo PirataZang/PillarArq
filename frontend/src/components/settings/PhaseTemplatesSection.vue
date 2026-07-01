@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import Button from '@/components/utils/Button.vue'
+import FormLogsButton from '@/components/audit/FormLogsButton.vue'
 import Input from '@/components/utils/Input.vue'
 import Textarea from '@/components/utils/Textarea.vue'
 import { useSwal } from '@/utils/swal'
@@ -219,7 +220,11 @@ const removeTemplate = async (templateId) => {
               <Input v-model="editForm.weight_percent" label="%" type="number" min="0" max="100" />
             </div>
             <Textarea v-model="editForm.description" label="Descrição" rows="1" />
-            <div class="flex justify-end gap-2">
+            <div class="flex justify-end gap-2 items-center">
+              <FormLogsButton
+                subject-type="CompanyPhaseTemplate"
+                :subject-id="template.id"
+              />
               <Button variant="secondary" size="sm" @click="cancelEdit">Cancelar</Button>
               <Button variant="primary" size="sm" :disabled="saving" @click="saveEdit(template.id)">Salvar</Button>
             </div>

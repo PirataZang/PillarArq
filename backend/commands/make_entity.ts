@@ -3,201 +3,173 @@ import type { CommandOptions } from '@adonisjs/core/types/ace'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import stringHelpers from '@adonisjs/core/helpers/string'
-
 import { fileURLToPath } from 'node:url'
 
 export default class MakeEntity extends BaseCommand {
   static commandName = 'make:entity'
-  static description = 'Creates a complete architectural boilerplate for a given entity'
-  
+  static description = 'Cria model, migration, service, controller e validators com auditoria'
+
   static options: CommandOptions = {
     startApp: false,
     allowUnknownFlags: false,
     staysAlive: false,
   }
 
-  @args.string({ description: 'Name of the entity (e.g., Project)' })
+  @args.string({ description: 'Nome da entidade (ex: Product)' })
   declare name: string
 
   async run() {
     const entityName = stringHelpers.pascalCase(stringHelpers.singular(this.name))
-    const entityNamePlural = stringHelpers.pascalCase(stringHelpers.plural(this.name))
-    const tableName = stringHelpers.snakeCase(stringHelpers.plural(this.name))
+    const entityPlural = stringHelpers.plural(entityName)
+    const tableName = stringHelpers.snakeCase(entityPlural)
+    const routePath = stringHelpers.dashCase(entityPlural)
     const varName = stringHelpers.camelCase(entityName)
 
     const baseDir = fileURLToPath(this.app.appRoot)
-    
-    // Define all file paths
+
     const files = {
-      model: path.join(baseDir, 'app', 'Models', `${entityName}.ts`),
-      controller: path.join(baseDir, 'app', 'Controllers', 'Http', `${entityNamePlural}Controller.ts`),
-      service: path.join(baseDir, 'app', 'Services', entityName, `${entityName}Service.ts`),
-      createValidator: path.join(baseDir, 'app', 'Validators', entityName, `Create${entityName}Validator.ts`),
-      updateValidator: path.join(baseDir, 'app', 'Validators', entityName, `Update${entityName}Validator.ts`),
-      createDto: path.join(baseDir, 'app', 'DTOs', entityName, `Create${entityName}DTO.ts`),
-      updateDto: path.join(baseDir, 'app', 'DTOs', entityName, `Update${entityName}DTO.ts`),
-      filters: path.join(baseDir, 'app', 'Interfaces', entityName, `${entityName}Filters.ts`),
+      model: path.join(baseDir, 'app', 'models', `${stringHelpers.snakeCase(entityName)}.ts`),
+      controller: path.join(baseDir, 'app', 'controllers', 'http', `${tableName}_controller.ts`),
+      service: path.join(baseDir, 'app', 'services', `${stringHelpers.snakeCase(entityName)}_service.ts`),
+      createValidator: path.join(baseDir, 'app', 'validators', `${stringHelpers.snakeCase(entityName)}_validator.ts`),
       migration: path.join(baseDir, 'database', 'migrations', `${Date.now()}_create_${tableName}_table.ts`),
     }
 
-    // Helper to write file
     const writeFile = async (filePath: string, content: string) => {
       await fs.mkdir(path.dirname(filePath), { recursive: true })
       await fs.writeFile(filePath, content.trim() + '\n')
       this.logger.success(`CREATED ${path.relative(baseDir, filePath)}`)
     }
 
-    // --- TEMPLATES ---
     const modelTemplate = `
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import Company from './company.js'
+import { Auditable } from './mixins/auditable.js'
 
-export default class ${entityName} extends BaseModel {
+export default class ${entityName} extends Auditable(BaseModel) {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ serializeAs: 'company_id' })
   declare companyId: string
 
-  @column()
+  @column({ serializeAs: 'created_by' })
   declare createdBy: string | null
 
-  @column()
+  @column({ serializeAs: 'updated_by' })
   declare updatedBy: string | null
 
-  @column.dateTime()
-  declare deletedAt: DateTime | null
-
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, serializeAs: 'created_at' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: 'updated_at' })
   declare updatedAt: DateTime
+
+  @column.dateTime({ serializeAs: 'deleted_at' })
+  declare deletedAt: DateTime | null
+
+  @belongsTo(() => Company)
+  declare company: BelongsTo<typeof Company>
 }
 `
 
     const controllerTemplate = `
 import type { HttpContext } from '@adonisjs/core/http'
-import ${entityName}Service from '../../Services/${entityName}/${entityName}Service.js'
-import { create${entityName}Validator } from '../../Validators/${entityName}/Create${entityName}Validator.js'
-import { update${entityName}Validator } from '../../Validators/${entityName}/Update${entityName}Validator.js'
+import ${entityName}Service from '#services/${stringHelpers.snakeCase(entityName)}_service'
+import { create${entityName}Validator, update${entityName}Validator } from '#validators/${stringHelpers.snakeCase(entityName)}_validator'
+import User from '#models/user'
 
-export default class ${entityNamePlural}Controller {
-  public async index({ request, response }: HttpContext) {
-    const filters = request.qs()
-    const result = await ${entityName}Service.paginate(filters)
-    return response.ok(result)
+export default class ${entityPlural}Controller {
+  private ${varName}Service = new ${entityName}Service()
+
+  async index({ auth, response }: HttpContext) {
+    const companyId = (auth.user as User).companyId
+    const items = await this.${varName}Service.index(companyId)
+    return response.ok({ success: true, message: '${entityPlural} listed successfully', data: items })
   }
 
-  public async store({ request, response }: HttpContext) {
-    const data = await request.validateUsing(create${entityName}Validator)
-    const result = await ${entityName}Service.create(data)
-    return response.created(result)
+  async show({ auth, params, response }: HttpContext) {
+    const companyId = (auth.user as User).companyId
+    const item = await this.${varName}Service.show(companyId, params.id)
+    return response.ok({ success: true, message: '${entityName} retrieved successfully', data: item })
   }
 
-  public async show({ params, response }: HttpContext) {
-    const result = await ${entityName}Service.findById(params.id)
-    return response.ok(result)
+  async store({ auth, request, response }: HttpContext) {
+    const user = auth.user as User
+    const payload = await request.validateUsing(create${entityName}Validator)
+    const item = await this.${varName}Service.store(user.companyId, payload, user.id)
+    return response.created({ success: true, message: '${entityName} created successfully', data: item })
   }
 
-  public async update({ params, request, response }: HttpContext) {
-    const data = await request.validateUsing(update${entityName}Validator)
-    const result = await ${entityName}Service.update(params.id, data)
-    return response.ok(result)
+  async update({ auth, request, params, response }: HttpContext) {
+    const user = auth.user as User
+    const payload = await request.validateUsing(update${entityName}Validator)
+    const item = await this.${varName}Service.update(user.companyId, params.id, payload, user.id)
+    return response.ok({ success: true, message: '${entityName} updated successfully', data: item })
   }
 
-  public async destroy({ params, response }: HttpContext) {
-    await ${entityName}Service.delete(params.id)
-    return response.noContent()
+  async destroy({ auth, params, response }: HttpContext) {
+    const user = auth.user as User
+    await this.${varName}Service.destroy(user.companyId, params.id, user.id)
+    return response.ok({ success: true, message: '${entityName} deleted successfully', data: {} })
   }
 }
 `
 
     const serviceTemplate = `
-import ${entityName} from '../../Models/${entityName}.js'
-import type { Create${entityName}DTO } from '../../DTOs/${entityName}/Create${entityName}DTO.js'
-import type { Update${entityName}DTO } from '../../DTOs/${entityName}/Update${entityName}DTO.js'
-import type { ${entityName}Filters } from '../../Interfaces/${entityName}/${entityName}Filters.js'
+import { DateTime } from 'luxon'
+import ${entityName} from '#models/${stringHelpers.snakeCase(entityName)}'
+import type { Infer } from '@vinejs/vine/types'
+import type { create${entityName}Validator, update${entityName}Validator } from '#validators/${stringHelpers.snakeCase(entityName)}_validator'
 
-class ${entityName}Service {
-  public async paginate(filters: ${entityName}Filters) {
-    const page = filters.page || 1
-    const limit = filters.limit || 10
-    
-    const query = ${entityName}.query()
-    
-    if (filters.companyId) {
-      query.where('companyId', filters.companyId)
-    }
+type CreatePayload = Infer<typeof create${entityName}Validator>
+type UpdatePayload = Infer<typeof update${entityName}Validator>
 
-    return await query.paginate(page, limit)
+export default class ${entityName}Service {
+  async index(companyId: string) {
+    return ${entityName}.query().where('companyId', companyId).whereNull('deletedAt').orderBy('id', 'desc')
   }
 
-  public async create(data: Create${entityName}DTO) {
-    return await ${entityName}.create(data)
+  async show(companyId: string, id: string) {
+    return ${entityName}.query().where('id', id).where('companyId', companyId).whereNull('deletedAt').firstOrFail()
   }
 
-  public async findById(id: string | number) {
-    return await ${entityName}.findOrFail(id)
+  async store(companyId: string, payload: CreatePayload, userId?: string) {
+    return ${entityName}.create({ ...payload, companyId, createdBy: userId ?? null })
   }
 
-  public async update(id: string | number, data: Update${entityName}DTO) {
-    const ${varName} = await this.findById(id)
-    ${varName}.merge(data)
-    return await ${varName}.save()
+  async update(companyId: string, id: string, payload: UpdatePayload, userId?: string) {
+    const ${varName} = await this.show(companyId, id)
+    ${varName}.merge({ ...payload, updatedBy: userId ?? null })
+    await ${varName}.save()
+    return ${varName}
   }
 
-  public async delete(id: string | number) {
-    const ${varName} = await this.findById(id)
-    await ${varName}.delete()
+  async destroy(companyId: string, id: string, userId?: string) {
+    const ${varName} = await this.show(companyId, id)
+    ${varName}.deletedAt = DateTime.now()
+    ${varName}.updatedBy = userId ?? null
+    await ${varName}.save()
   }
 }
-
-export default new ${entityName}Service()
 `
 
-    const createValidatorTemplate = `
+    const validatorTemplate = `
 import vine from '@vinejs/vine'
 
 export const create${entityName}Validator = vine.compile(
   vine.object({
-    companyId: vine.string().trim(),
-    // Add additional validation fields here
+    // adicione os campos da entidade
   })
 )
-`
-
-    const updateValidatorTemplate = `
-import vine from '@vinejs/vine'
 
 export const update${entityName}Validator = vine.compile(
   vine.object({
-    companyId: vine.string().trim().optional(),
-    // Add additional validation fields here
+    // adicione os campos da entidade (opcionais)
   })
 )
-`
-
-    const createDtoTemplate = `
-export interface Create${entityName}DTO {
-  companyId: string
-  // Add additional properties here
-}
-`
-
-    const updateDtoTemplate = `
-export interface Update${entityName}DTO {
-  companyId?: string
-  // Add additional properties here
-}
-`
-
-    const filtersTemplate = `
-export interface ${entityName}Filters {
-  page?: number
-  limit?: number
-  companyId?: string
-}
 `
 
     const migrationTemplate = `
@@ -209,15 +181,13 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.bigIncrements('id').primary()
-      table.bigInteger('company_id').notNullable()
-      table.bigInteger('created_by').nullable()
-      table.bigInteger('updated_by').nullable()
-      
-      table.timestamp('deleted_at').nullable()
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
+      table.bigInteger('company_id').notNullable().references('id').inTable('companies').onDelete('CASCADE')
+      table.bigInteger('created_by').nullable().references('id').inTable('users').onDelete('SET NULL')
+      table.bigInteger('updated_by').nullable().references('id').inTable('users').onDelete('SET NULL')
+      table.timestamp('created_at', { useTz: true }).notNullable()
+      table.timestamp('updated_at', { useTz: true }).notNullable()
+      table.timestamp('deleted_at', { useTz: true }).nullable()
 
-      // Indexes
       table.index(['company_id'])
       table.index(['company_id', 'id'])
     })
@@ -229,17 +199,21 @@ export default class extends BaseSchema {
 }
 `
 
-    // --- WRITE FILES ---
     await writeFile(files.model, modelTemplate)
     await writeFile(files.controller, controllerTemplate)
     await writeFile(files.service, serviceTemplate)
-    await writeFile(files.createValidator, createValidatorTemplate)
-    await writeFile(files.updateValidator, updateValidatorTemplate)
-    await writeFile(files.createDto, createDtoTemplate)
-    await writeFile(files.updateDto, updateDtoTemplate)
-    await writeFile(files.filters, filtersTemplate)
+    await writeFile(files.createValidator, validatorTemplate)
     await writeFile(files.migration, migrationTemplate)
 
-    this.logger.success(`Entity ${entityName} boilerplate created successfully!`)
+    this.logger.info('')
+    this.logger.info('Auditoria: model já estende Auditable(BaseModel) — logs automáticos em create/update/delete.')
+    this.logger.info(`Rotas sugeridas em start/routes.ts (grupo tenant):`)
+    this.logger.info(`  router.get('/${routePath}', [${entityPlural}Controller, 'index'])`)
+    this.logger.info(`  router.get('/${routePath}/:id', [${entityPlural}Controller, 'show'])`)
+    this.logger.info(`  router.post('/${routePath}', [${entityPlural}Controller, 'store'])`)
+    this.logger.info(`  router.put('/${routePath}/:id', [${entityPlural}Controller, 'update'])`)
+    this.logger.info(`  router.delete('/${routePath}/:id', [${entityPlural}Controller, 'destroy'])`)
+    this.logger.info(`Logs: GET /api/v1/activity-logs/${entityName}/:id`)
+    this.logger.success(`Entity ${entityName} criada com auditoria.`)
   }
 }

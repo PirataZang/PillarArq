@@ -219,7 +219,8 @@ onUnmounted(() => {
             isActive(item.href)
               ? 'bg-white/8 text-white border-l-2 border-l-orange-500'
               : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
-            'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
+            'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300',
+            open ? 'px-3 mx-4' : 'justify-center w-full'
           ]" @click="handleLinkClick">
             <span class="w-8 h-8 flex items-center justify-center shrink-0">
               <i
@@ -227,7 +228,7 @@ onUnmounted(() => {
             </span>
             <span :class="[
               open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
-              'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
+              'transition-all duration-300 ease-in-out whitespace-nowrap truncate flex-1 min-w-0'
             ]">{{ item.name }}</span>
 
             <!-- Tooltip -->
@@ -238,52 +239,76 @@ onUnmounted(() => {
           </router-link>
 
           <!-- Accordion Item -->
-          <div v-else class="space-y-1 flex flex-col">
-            <button @click="handleAccordionClick(item.id)" :class="[
-              'group relative flex items-center h-12 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4',
-              openMenus.includes(item.id) && open ? 'text-white' : 'text-marble-300 hover:bg-charcoal-light hover:text-white',
-            ]">
-              <span class="w-8 h-8 flex items-center justify-center shrink-0">
-                <i
-                  :class="[openMenus.includes(item.id) && open ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', item.icon, 'fa-fw text-lg text-center transition-colors']"></i>
-              </span>
-              <span :class="[
-                open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
-                'transition-all duration-300 ease-in-out whitespace-nowrap truncate flex-1 text-left'
-              ]">{{ item.name }}</span>
-              <i :class="[
-                'fa-solid fa-chevron-down fa-fw text-xs text-gray-500 transition-all duration-300 ml-2 shrink-0',
-                open ? 'opacity-100 scale-100' : 'opacity-0 scale-0 w-0 overflow-hidden',
-                openMenus.includes(item.id) ? 'rotate-180' : ''
-              ]"></i>
+          <div v-else class="w-full" :class="open ? 'space-y-1' : ''">
 
-              <!-- Tooltip -->
-              <div v-if="!open"
-                class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
-                {{ item.name }}
-              </div>
-            </button>
+            <!-- Sidebar fechado: ícones empilhados e centralizados -->
+            <div v-if="!open" class="flex flex-col w-full gap-0.5 overflow-hidden">
+              <button @click="handleAccordionClick(item.id)" :class="[
+                'group relative flex items-center justify-center h-12 w-full rounded-xl transition-all duration-300',
+                'text-marble-300 hover:bg-charcoal-light hover:text-white',
+              ]">
+                <i :class="[
+                  'text-marble-500 group-hover:text-marble-300',
+                  item.icon, 'fa-fw text-lg transition-colors'
+                ]"></i>
 
-            <!-- Submenu Items -->
-            <div v-show="openMenus.includes(item.id) && open"
-              class="space-y-1 mt-1 mb-2 transition-all duration-300 ease-in-out" :class="open ? 'pl-4' : 'pl-0'">
-              <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href"
-                :title="!open ? subItem.name : ''" :class="[
+                <div v-if="!openMenus.includes(item.id)"
+                  class="absolute left-full ml-4 px-2.5 py-1.5 bg-charcoal text-marble-100 text-xs font-semibold rounded-lg shadow-md border border-charcoal-border pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap">
+                  {{ item.name }}
+                </div>
+              </button>
+
+              <router-link v-for="subItem in item.children" v-show="openMenus.includes(item.id)" :key="subItem.id"
+                :to="subItem.href" :class="[
                   isActive(subItem.href)
                     ? 'bg-white/8 text-white border-l-2 border-l-orange-500'
                     : 'text-marble-400 hover:bg-charcoal-light/80 hover:text-white',
-                  'group flex items-center h-10 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4'
+                  'flex items-center justify-center h-10 w-full rounded-xl transition-all duration-300'
                 ]" @click="handleLinkClick">
-                <span class="w-8 h-8 flex items-center justify-center shrink-0">
-                  <i
-                    :class="[isActive(subItem.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300', subItem.icon, 'fa-fw text-base text-center transition-colors']"></i>
-                </span>
-                <span :class="[
-                  open ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 overflow-hidden',
-                  'transition-all duration-300 ease-in-out whitespace-nowrap truncate'
-                ]">{{ subItem.name }}</span>
+                <i :class="[
+                  isActive(subItem.href) ? 'text-marble-200' : 'text-marble-500',
+                  subItem.icon, 'fa-fw text-sm transition-colors'
+                ]"></i>
               </router-link>
             </div>
+
+            <!-- Sidebar aberto: accordion com texto -->
+            <template v-else>
+              <button @click="handleAccordionClick(item.id)" :class="[
+                'group relative flex items-center h-12 w-full text-sm font-medium rounded-xl transition-all duration-300 px-4',
+                'text-marble-300 hover:bg-charcoal-light hover:text-white',
+              ]">
+                <span class="w-8 h-8 flex items-center justify-center shrink-0">
+                  <i :class="[
+                    'text-marble-500 group-hover:text-marble-300',
+                    item.icon, 'fa-fw text-lg text-center transition-colors'
+                  ]"></i>
+                </span>
+                <span class="ml-3 flex-1 min-w-0 text-left whitespace-nowrap truncate">{{ item.name }}</span>
+                <i :class="[
+                  'fa-solid fa-chevron-down fa-fw text-xs text-gray-500 transition-transform duration-300 ml-2 shrink-0',
+                  openMenus.includes(item.id) ? 'rotate-180' : ''
+                ]"></i>
+              </button>
+
+              <div v-show="openMenus.includes(item.id)"
+                class="flex flex-col space-y-1 mt-1 mb-2 pl-4 transition-all duration-300 ease-in-out overflow-hidden">
+                <router-link v-for="subItem in item.children" :key="subItem.id" :to="subItem.href" :class="[
+                    isActive(subItem.href)
+                      ? 'bg-white/8 text-white border-l-2 border-l-orange-500'
+                      : 'text-marble-400 hover:bg-charcoal-light/80 hover:text-white',
+                    'group relative flex items-center h-10 text-sm font-medium rounded-xl transition-all duration-300 px-3 mx-4 min-w-0'
+                  ]" @click="handleLinkClick">
+                  <span class="w-8 h-8 flex items-center justify-center shrink-0">
+                    <i :class="[
+                      isActive(subItem.href) ? 'text-marble-200' : 'text-marble-500 group-hover:text-marble-300',
+                      subItem.icon, 'fa-fw text-base text-center transition-colors'
+                    ]"></i>
+                  </span>
+                  <span class="ml-3 flex-1 min-w-0 whitespace-nowrap truncate">{{ subItem.name }}</span>
+                </router-link>
+              </div>
+            </template>
           </div>
 
         </template>

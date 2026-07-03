@@ -4,8 +4,12 @@ import Client from '#models/client'
 import { PROJECT_STATUSES, type ProjectStatus } from '#constants/project_status'
 import {
   buildProjectBudgetSummary,
-  calculateProgressPercent,
+  calculateProgressPercentFromPhases,
 } from '#utils/project_budget'
+import {
+  resolvePhaseTemplatesBySortOrder,
+  applyPhaseTemplates,
+} from '#utils/company_phase_templates'
 
 export interface DashboardFilters {
   period_from: string
@@ -102,9 +106,15 @@ export default class DashboardService {
       .where('createdAt', '<=', to.toSQL()!)
       .orderBy('createdAt', 'asc')
 
+    const templatesBySortOrder = await resolvePhaseTemplatesBySortOrder(companyId)
+
     const projectMetrics = projects.map((project) => {
       const budget = buildProjectBudgetSummary(project)
-      const progress = calculateProgressPercent(project)
+      const phases = applyPhaseTemplates(
+        (project.phases ?? []).map((phase) => phase.serialize()),
+        templatesBySortOrder
+      )
+      const progress = calculateProgressPercentFromPhases(phases)
 
       return {
         progress,
@@ -136,11 +146,18 @@ export default class DashboardService {
       projects_by_status: projectsByStatus,
       projects_timeline: buildMonthlyTimeline(from, to, projects),
       clients_timeline: buildMonthlyTimeline(from, to, clients),
-      projects_progress: projects.slice(0, 12).map((project) => ({
-        id: project.id,
-        name: project.name,
-        progress: calculateProgressPercent(project),
-      })),
+      projects_progress: projects.slice(0, 12).map((project) => {
+        const phases = applyPhaseTemplates(
+          (project.phases ?? []).map((phase) => phase.serialize()),
+          templatesBySortOrder
+        )
+
+        return {
+          id: project.id,
+          name: project.name,
+          progress: calculateProgressPercentFromPhases(phases),
+        }
+      }),
     }
   }
 }

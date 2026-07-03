@@ -3,7 +3,11 @@ import ProjectPhase from '#models/project_phase'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
 import type { updateProjectPhaseValidator } from '#validators/project_validator'
-import { calculateProgressPercent } from '#utils/project_budget'
+import { calculateProgressPercentFromPhases } from '#utils/project_budget'
+import {
+  resolvePhaseTemplatesBySortOrder,
+  applyPhaseTemplates,
+} from '#utils/company_phase_templates'
 
 type UpdatePayload = Infer<typeof updateProjectPhaseValidator>
 
@@ -39,14 +43,28 @@ export default class ProjectPhaseService {
       .where('companyId', companyId)
       .firstOrFail()
 
-    phase.isCompleted = payload.is_completed
-    phase.completedAt = payload.is_completed ? DateTime.now() : null
-    await phase.save()
+    const phases = await ProjectPhase.query()
+      .where('projectId', projectId)
+      .where('companyId', companyId)
+      .orderBy('sortOrder', 'asc')
+
+    const completedAt = DateTime.now()
+
+    for (const item of phases) {
+      item.isCompleted = payload.is_completed && item.id === phase.id
+      item.completedAt = item.isCompleted ? completedAt : null
+      await item.save()
+    }
 
     await project.load('phases')
-    project.progressPercent = calculateProgressPercent(project)
+    const templatesBySortOrder = await resolvePhaseTemplatesBySortOrder(companyId)
+    const enrichedPhases = applyPhaseTemplates(
+      project.phases.map((item) => item.serialize()),
+      templatesBySortOrder
+    )
+    project.progressPercent = calculateProgressPercentFromPhases(enrichedPhases)
     await project.save()
 
-    return phase
+    return phases.find((item) => item.id === phase.id) ?? phase
   }
 }

@@ -20,6 +20,9 @@ export default class CompanyPhaseTemplate extends Auditable(BaseModel) {
   @column({ serializeAs: 'weight_percent' })
   declare weightPercent: number
 
+  @column()
+  declare color: string
+
   @column({ serializeAs: 'sort_order' })
   declare sortOrder: number
 

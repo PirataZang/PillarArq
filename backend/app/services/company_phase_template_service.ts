@@ -37,6 +37,7 @@ export default class CompanyPhaseTemplateService {
       name: payload.name,
       description: payload.description ?? null,
       weightPercent: payload.weight_percent,
+      color: payload.color ?? '#5c5852',
       sortOrder,
     })
   }

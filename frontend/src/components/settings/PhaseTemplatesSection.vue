@@ -1,9 +1,11 @@
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import Button from '@/components/utils/Button.vue'
 import FormLogsButton from '@/components/audit/FormLogsButton.vue'
 import Input from '@/components/utils/Input.vue'
 import Textarea from '@/components/utils/Textarea.vue'
+import Modal from '@/components/utils/Modal.vue'
+import ColorPicker from '@/components/utils/ColorPicker.vue'
 import { useSwal } from '@/utils/swal'
 import api from '@/services/api'
 
@@ -13,29 +15,10 @@ const expanded = ref(false)
 const loading = ref(true)
 const saving = ref(false)
 const templates = ref([])
-const totalWeight = ref(0)
-const editingId = ref(null)
+const modalOpen = ref(false)
+const editingTemplate = ref(null)
 
-const form = reactive({ name: '', description: '', weight_percent: '' })
-const editForm = reactive({ name: '', description: '', weight_percent: '' })
-
-const phaseColors = ['bg-charcoal', 'bg-amber-500', 'bg-blue-500', 'bg-emerald-500', 'bg-violet-500', 'bg-rose-500']
-
-const weightStatus = computed(() => {
-  if (totalWeight.value === 100) return 'ok'
-  if (totalWeight.value > 100) return 'over'
-  return 'under'
-})
-
-const remainingWeight = computed(() => 100 - totalWeight.value)
-
-const weightStatusLabel = computed(() => {
-  if (weightStatus.value === 'ok') return 'OK'
-  if (weightStatus.value === 'over') return `+${totalWeight.value - 100}%`
-  return `−${remainingWeight.value}%`
-})
-
-const phaseColor = (index) => phaseColors[index % phaseColors.length]
+const form = reactive({ name: '', description: '', weight_percent: '', color: '#5c5852' })
 
 const loadTemplates = async () => {
   loading.value = true
@@ -43,10 +26,9 @@ const loadTemplates = async () => {
     const { data } = await api.get('/settings/phase-templates')
     if (data?.success) {
       templates.value = data.data.templates ?? []
-      totalWeight.value = data.data.total_weight_percent ?? 0
     }
   } catch {
-    swal.error('Erro', 'Não foi possível carregar as etapas.')
+    swal.error('Erro', 'Não foi possível carregar os status.')
   } finally {
     loading.value = false
   }
@@ -58,61 +40,61 @@ const resetForm = () => {
   form.name = ''
   form.description = ''
   form.weight_percent = ''
+  form.color = '#5c5852'
 }
 
-const addTemplate = async () => {
+const openCreateModal = () => {
+  editingTemplate.value = null
+  resetForm()
+  modalOpen.value = true
+}
+
+const openEditModal = (template) => {
+  editingTemplate.value = template
+  form.name = template.name
+  form.description = template.description ?? ''
+  form.weight_percent = String(template.weight_percent)
+  form.color = template.color || '#5c5852'
+  modalOpen.value = true
+}
+
+const closeModal = () => {
+  modalOpen.value = false
+  editingTemplate.value = null
+  resetForm()
+}
+
+const saveTemplate = async () => {
   saving.value = true
   try {
-    await api.post('/settings/phase-templates', {
+    const payload = {
       name: form.name,
-      description: form.description || undefined,
+      description: form.description || (editingTemplate.value ? null : undefined),
       weight_percent: Number(form.weight_percent),
-    })
-    resetForm()
+      color: form.color,
+    }
+
+    if (editingTemplate.value) {
+      await api.put(`/settings/phase-templates/${editingTemplate.value.id}`, payload)
+      swal.success('Sucesso', 'Status atualizado.')
+    } else {
+      await api.post('/settings/phase-templates', payload)
+      swal.success('Sucesso', 'Status adicionado.')
+    }
+
+    closeModal()
     await loadTemplates()
-    swal.success('Sucesso', 'Etapa adicionada.')
   } catch (err) {
-    swal.error('Erro', err.response?.data?.message || 'Não foi possível adicionar.')
-  } finally {
-    saving.value = false
-  }
-}
-
-const startEdit = (template) => {
-  editingId.value = template.id
-  editForm.name = template.name
-  editForm.description = template.description ?? ''
-  editForm.weight_percent = String(template.weight_percent)
-  expanded.value = true
-}
-
-const cancelEdit = () => {
-  editingId.value = null
-}
-
-const saveEdit = async (templateId) => {
-  saving.value = true
-  try {
-    await api.put(`/settings/phase-templates/${templateId}`, {
-      name: editForm.name,
-      description: editForm.description || null,
-      weight_percent: Number(editForm.weight_percent),
-    })
-    editingId.value = null
-    await loadTemplates()
-    swal.success('Sucesso', 'Etapa atualizada.')
-  } catch (err) {
-    swal.error('Erro', err.response?.data?.message || 'Não foi possível atualizar.')
+    swal.error('Erro', err.response?.data?.message || 'Não foi possível salvar.')
   } finally {
     saving.value = false
   }
 }
 
 const removeTemplate = async (templateId) => {
-  const confirmed = await swal.confirm('Remover etapa', 'Deseja remover esta etapa?')
+  const confirmed = await swal.confirm('Remover status', 'Deseja remover este status?')
   if (!confirmed) return
   await api.delete(`/settings/phase-templates/${templateId}`)
-  if (editingId.value === templateId) editingId.value = null
   await loadTemplates()
 }
 </script>
@@ -125,35 +107,10 @@ const removeTemplate = async (templateId) => {
       @click="expanded = !expanded"
     >
       <div class="min-w-0 flex-1">
-        <p class="text-sm font-semibold text-marble-900">Etapas de progresso</p>
+        <p class="text-sm font-semibold text-marble-900">Status de progresso</p>
         <p class="text-[11px] text-marble-500 truncate">
-          {{ templates.length }} etapa{{ templates.length === 1 ? '' : 's' }} · soma 100%
+          {{ templates.length }} status configurado{{ templates.length === 1 ? '' : 's' }} com percentual fixo
         </p>
-      </div>
-
-      <div
-        class="hidden sm:flex items-center gap-2 shrink-0 w-40"
-        :class="{
-          'text-green-700': weightStatus === 'ok',
-          'text-amber-700': weightStatus === 'under',
-          'text-red-700': weightStatus === 'over',
-        }"
-      >
-        <span class="text-xs font-bold tabular-nums w-8">{{ totalWeight }}%</span>
-        <div class="flex-1 h-1 rounded-full bg-marble-200 overflow-hidden flex">
-          <div
-            v-for="(template, index) in templates"
-            :key="template.id"
-            :class="phaseColor(index)"
-            :style="{
-              width: weightStatus === 'over'
-                ? `${(template.weight_percent / totalWeight) * 100}%`
-                : `${template.weight_percent}%`,
-            }"
-          />
-          <div v-if="weightStatus === 'under'" class="bg-marble-300/50" :style="{ width: `${remainingWeight}%` }" />
-        </div>
-        <span class="text-[10px] font-medium tabular-nums w-7">{{ weightStatusLabel }}</span>
       </div>
 
       <i
@@ -163,74 +120,58 @@ const removeTemplate = async (templateId) => {
     </button>
 
     <div v-show="expanded" class="border-t border-marble-200 px-4 py-3 space-y-3">
-      <div
-        class="flex sm:hidden items-center gap-2 rounded-md border border-marble-200 px-2.5 py-1.5"
-        :class="{
-          'border-green-200 bg-green-50/50': weightStatus === 'ok',
-          'border-amber-200 bg-amber-50/50': weightStatus === 'under',
-          'border-red-200 bg-red-50/50': weightStatus === 'over',
-        }"
-      >
-        <span class="text-xs font-bold tabular-nums">{{ totalWeight }}%</span>
-        <div class="flex-1 h-1 rounded-full bg-marble-200 overflow-hidden flex">
-          <div
-            v-for="(template, index) in templates"
-            :key="`m-${template.id}`"
-            :class="phaseColor(index)"
-            :style="{
-              width: weightStatus === 'over'
-                ? `${(template.weight_percent / totalWeight) * 100}%`
-                : `${template.weight_percent}%`,
-            }"
-          />
-          <div v-if="weightStatus === 'under'" class="bg-marble-300/50" :style="{ width: `${remainingWeight}%` }" />
-        </div>
-        <span class="text-[10px] font-medium tabular-nums">{{ weightStatusLabel }}</span>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-[1fr_64px_auto] gap-2 items-end">
-        <Input v-model="form.name" label="Nova etapa" placeholder="Ex: Projeto executivo" />
-        <Input v-model="form.weight_percent" label="%" type="number" min="0" max="100" placeholder="10" />
-        <Button variant="primary" size="sm" class="sm:mb-0.5" :disabled="saving" @click="addTemplate">
-          <i class="fa-solid fa-plus"></i>
+      <div class="flex justify-end">
+        <Button variant="primary" size="sm" @click="openCreateModal">
+          <i class="fa-solid fa-plus mr-1.5"></i>
+          Novo status
         </Button>
       </div>
 
       <div v-if="loading" class="text-xs text-marble-500">Carregando...</div>
-      <div v-else-if="templates.length === 0" class="text-xs text-marble-500">Nenhuma etapa.</div>
-      <div v-else class="rounded-md border border-marble-200 divide-y divide-marble-100 max-h-44 overflow-y-auto">
-        <div v-for="(template, index) in templates" :key="template.id">
-          <div v-if="editingId !== template.id" class="flex items-center gap-2 px-2.5 py-1.5">
-            <span class="h-1.5 w-1.5 rounded-full shrink-0" :class="phaseColor(index)" />
-            <p class="flex-1 text-xs text-marble-900 truncate">{{ template.name }}</p>
-            <span class="text-[11px] font-semibold tabular-nums text-marble-600 shrink-0">
-              {{ template.weight_percent }}%
-            </span>
-            <button type="button" class="p-0.5 text-marble-400 hover:text-marble-700" @click.stop="startEdit(template)">
-              <i class="fa-solid fa-pen text-[9px]"></i>
-            </button>
-            <button type="button" class="p-0.5 text-marble-400 hover:text-red-600" @click.stop="removeTemplate(template.id)">
-              <i class="fa-solid fa-trash text-[9px]"></i>
-            </button>
+      <div v-else-if="templates.length === 0" class="text-xs text-marble-500">Nenhum status.</div>
+      <div v-else class="rounded-md border border-marble-200 divide-y divide-marble-100">
+        <div v-for="template in templates" :key="template.id" class="flex items-center gap-3 px-3 py-2">
+          <span class="h-4 w-4 rounded-full shrink-0 ring-1 ring-black/10" :style="{ backgroundColor: template.color || '#5c5852' }" />
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-marble-900 truncate">{{ template.name }}</p>
+            <p v-if="template.description" class="text-[11px] text-marble-500 truncate">{{ template.description }}</p>
           </div>
-
-          <div v-else class="p-2.5 bg-marble-50 space-y-2" @click.stop>
-            <div class="grid grid-cols-[1fr_64px] gap-2">
-              <Input v-model="editForm.name" label="Título" />
-              <Input v-model="editForm.weight_percent" label="%" type="number" min="0" max="100" />
-            </div>
-            <Textarea v-model="editForm.description" label="Descrição" rows="1" />
-            <div class="flex justify-end gap-2 items-center">
-              <FormLogsButton
-                subject-type="CompanyPhaseTemplate"
-                :subject-id="template.id"
-              />
-              <Button variant="secondary" size="sm" @click="cancelEdit">Cancelar</Button>
-              <Button variant="primary" size="sm" :disabled="saving" @click="saveEdit(template.id)">Salvar</Button>
-            </div>
+          <span class="text-xs font-semibold tabular-nums text-marble-600 shrink-0">
+            {{ template.weight_percent }}%
+          </span>
+          <div class="flex items-center gap-1">
+            <button type="button" class="p-1.5 text-marble-400 hover:text-marble-700" @click.stop="openEditModal(template)">
+              <i class="fa-solid fa-pen text-xs"></i>
+            </button>
+            <button type="button" class="p-1.5 text-marble-400 hover:text-red-600" @click.stop="removeTemplate(template.id)">
+              <i class="fa-solid fa-trash text-xs"></i>
+            </button>
           </div>
         </div>
       </div>
     </div>
+
+    <Modal v-model="modalOpen" :title="editingTemplate ? 'Editar status' : 'Novo status'" :width="560" @close="closeModal">
+      <form id="phase-template-form" class="space-y-4" @submit.prevent="saveTemplate">
+        <div class="grid grid-cols-1 sm:grid-cols-[1fr_96px] gap-3">
+          <Input v-model="form.name" label="Nome" placeholder="Ex: Projeto executivo" required />
+          <Input v-model="form.weight_percent" label="%" type="number" min="0" max="100" required />
+        </div>
+        <Textarea v-model="form.description" label="Descrição" rows="3" />
+        <ColorPicker v-model="form.color" label="Cor do status" />
+      </form>
+
+      <template #actions>
+        <FormLogsButton
+          v-if="editingTemplate"
+          subject-type="CompanyPhaseTemplate"
+          :subject-id="editingTemplate.id"
+        />
+        <Button variant="secondary" @click="closeModal">Cancelar</Button>
+        <Button type="submit" form="phase-template-form" variant="primary" :loading="saving">
+          Salvar
+        </Button>
+      </template>
+    </Modal>
   </section>
 </template>

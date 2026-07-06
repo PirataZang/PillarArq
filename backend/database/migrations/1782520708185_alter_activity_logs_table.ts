@@ -27,15 +27,21 @@ export default class extends BaseSchema {
       ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS update_date timestamptz
     `)
 
-    await this.db.rawQuery(`
-      UPDATE activity_logs SET user_id = causer_id
-      WHERE user_id IS NULL AND causer_id IS NOT NULL
-    `).catch(() => undefined)
+    const hasCauserId = await this.schema.hasColumn(this.tableName, 'causer_id')
+    if (hasCauserId) {
+      await this.db.rawQuery(`
+        UPDATE activity_logs SET user_id = causer_id
+        WHERE user_id IS NULL AND causer_id IS NOT NULL
+      `)
+    }
 
-    await this.db.rawQuery(`
-      UPDATE activity_logs SET update_date = created_at
-      WHERE update_date IS NULL AND created_at IS NOT NULL
-    `).catch(() => undefined)
+    const hasCreatedAt = await this.schema.hasColumn(this.tableName, 'created_at')
+    if (hasCreatedAt) {
+      await this.db.rawQuery(`
+        UPDATE activity_logs SET update_date = created_at
+        WHERE update_date IS NULL AND created_at IS NOT NULL
+      `)
+    }
 
     await this.db.rawQuery(`
       UPDATE activity_logs SET update_date = NOW() WHERE update_date IS NULL
